@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../features/about/presentation/pages/about_page.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/register_page.dart';
 import '../../features/coming_soon/presentation/pages/coming_soon_page.dart';
@@ -14,6 +15,7 @@ class AppRoutes {
   static const home = '/home';
   static const settings = '/settings';
   static const autoTranslate = '/auto-translate';
+  static const about = '/about';
 }
 
 class AppRouter {
@@ -31,6 +33,8 @@ class AppRouter {
         return MaterialPageRoute(builder: (_) => const SettingsPage());
       case AppRoutes.autoTranslate:
         return MaterialPageRoute(builder: (_) => const ComingSoonPage());
+      case AppRoutes.about:
+        return MaterialPageRoute(builder: (_) => const AboutPage());
       default:
         return MaterialPageRoute(
           builder: (_) => Scaffold(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../app/router/app_router.dart';
 import '../../../../core/services/app_settings.dart';
 import '../bloc/settings_cubit.dart';
 
@@ -81,6 +82,13 @@ class SettingsPage extends StatelessWidget {
                     ),
                   ),
                 ],
+              ),
+              const SizedBox(height: 24),
+              const Divider(),
+              ListTile(
+                leading: const Icon(Icons.info_outline),
+                title: const Text('About'),
+                onTap: () => Navigator.of(context).pushNamed(AppRoutes.about),
               ),
             ],
           );

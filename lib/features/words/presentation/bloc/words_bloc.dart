@@ -45,6 +45,9 @@ class WordsBloc extends Bloc<WordsEvent, WordsState> {
     on<WordsShuffleRequested>(_onShuffleRequested);
     on<WordsResetOrderRequested>(_onResetOrderRequested);
     on<WordAdded>(_onWordAdded);
+    on<SpeakPauseRequested>(_onSpeakPauseRequested);
+    on<SpeakResumeRequested>(_onSpeakResumeRequested);
+    on<SpeakStopRequested>(_onSpeakStopRequested);
   }
 
   Future<void> _onWordsRequested(
@@ -166,12 +169,29 @@ class WordsBloc extends Bloc<WordsEvent, WordsState> {
     }
 
     try {
-      emit(state.copyWith(speakingWordId: word.id));
+      emit(
+        state.copyWith(
+          speakingWordId: word.id,
+          speakingStatus: SpeakingStatus.playing,
+          speakingMode: SpeakingMode.single,
+          speakingItemIndex: 0,
+          speakingItemTotal: 1,
+        ),
+      );
+
       await tts.speakSequence(items, iterations: settings.ttsIterations);
     } catch (e) {
       emit(state.copyWith(message: 'TTS failed: ${e.toString()}'));
     } finally {
-      emit(state.copyWith(speakingWordId: null));
+      emit(
+        state.copyWith(
+          speakingWordId: null,
+          speakingStatus: SpeakingStatus.idle,
+          speakingMode: SpeakingMode.none,
+          speakingItemIndex: -1,
+          speakingItemTotal: 0,
+        ),
+      );
     }
   }
 
@@ -181,53 +201,132 @@ class WordsBloc extends Bloc<WordsEvent, WordsState> {
   ) async {
     final settings = await _settings();
 
-    final words = <Word>[];
+    // Build the list of words in the requested tab.
+    final listWords = <Word>[];
     for (final w in state.words) {
       final isSaved = state.savedIds.contains(w.id);
       if (event.savedOnly && !isSaved) continue;
       if (!event.savedOnly && isSaved) continue;
-      words.add(w);
+      listWords.add(w);
     }
 
-    final items = <({String text, SpeechLang lang})>[];
-    for (final word in words) {
-      final showEn = state.showEnById[word.id] ?? state.showEn;
-      final showAr = state.showArById[word.id] ?? state.showAr;
-
-      if (showEn) {
-        items.add((
-          text: word.en,
-          lang: _speechLangForApp(settings.language, SpeechLang.en),
-        ));
-      }
-      if (showAr) {
-        items.add((
-          text: word.ar,
-          lang: _speechLangForApp(settings.language, SpeechLang.ar),
-        ));
-      }
-    }
-
-    if (items.isEmpty) {
+    if (listWords.isEmpty) {
       emit(state.copyWith(message: 'Nothing to speak'));
       return;
     }
 
+    emit(
+      state.copyWith(
+        speakingStatus: SpeakingStatus.playing,
+        speakingMode: event.savedOnly
+            ? SpeakingMode.savedList
+            : SpeakingMode.unsavedList,
+        speakingItemIndex: 0,
+        speakingItemTotal: listWords.length,
+        speakingWordId: listWords.first.id,
+      ),
+    );
+
     try {
-      await tts.speakSequence(
-        items,
-        iterations: settings.ttsIterations,
-        onProgress: (index, total) {
-          if (index < 0 || index >= words.length) return;
-          final currentWord = words[index];
-          emit(state.copyWith(speakingWordId: currentWord.id));
-        },
-        onDone: () => emit(state.copyWith(speakingWordId: null)),
-      );
+      for (var wi = 0; wi < listWords.length; wi++) {
+        // If user pressed stop, end immediately.
+        if (state.speakingStatus == SpeakingStatus.idle) break;
+
+        final word = listWords[wi];
+        final showEn = state.showEnById[word.id] ?? state.showEn;
+        final showAr = state.showArById[word.id] ?? state.showAr;
+
+        final items = <({String text, SpeechLang lang})>[];
+        if (showEn) {
+          items.add((
+            text: word.en,
+            lang: _speechLangForApp(settings.language, SpeechLang.en),
+          ));
+        }
+        if (showAr) {
+          items.add((
+            text: word.ar,
+            lang: _speechLangForApp(settings.language, SpeechLang.ar),
+          ));
+        }
+
+        if (items.isEmpty) continue;
+
+        // Highlight remains on the same word while EN/AR are spoken.
+        emit(
+          state.copyWith(
+            speakingWordId: word.id,
+            speakingStatus: SpeakingStatus.playing,
+            speakingItemIndex: wi,
+            speakingItemTotal: listWords.length,
+          ),
+        );
+
+        // Iterations apply per-word.
+        await tts.speakSequence(items, iterations: settings.ttsIterations);
+      }
     } catch (e) {
       emit(state.copyWith(message: 'TTS failed: ${e.toString()}'));
-      emit(state.copyWith(speakingWordId: null));
+    } finally {
+      emit(
+        state.copyWith(
+          speakingWordId: null,
+          speakingStatus: SpeakingStatus.idle,
+          speakingMode: SpeakingMode.none,
+          speakingItemIndex: -1,
+          speakingItemTotal: 0,
+        ),
+      );
     }
+  }
+
+  Future<void> _onSpeakPauseRequested(
+    SpeakPauseRequested event,
+    Emitter<WordsState> emit,
+  ) async {
+    try {
+      await tts.pause();
+      emit(state.copyWith(speakingStatus: SpeakingStatus.paused));
+    } catch (_) {
+      // ignore
+    }
+  }
+
+  Future<void> _onSpeakResumeRequested(
+    SpeakResumeRequested event,
+    Emitter<WordsState> emit,
+  ) async {
+    try {
+      await tts.resume();
+      emit(state.copyWith(speakingStatus: SpeakingStatus.playing));
+    } catch (_) {
+      // ignore
+    }
+  }
+
+  Future<void> _onSpeakStopRequested(
+    SpeakStopRequested event,
+    Emitter<WordsState> emit,
+  ) async {
+    try {
+      await tts.stop();
+    } finally {
+      emit(
+        state.copyWith(
+          speakingWordId: null,
+          speakingStatus: SpeakingStatus.idle,
+          speakingMode: SpeakingMode.none,
+          speakingItemIndex: -1,
+          speakingItemTotal: 0,
+        ),
+      );
+    }
+  }
+
+  @override
+  Future<void> close() async {
+    await tts.stop();
+    return super.close();
   }
 
   void _onShuffleRequested(

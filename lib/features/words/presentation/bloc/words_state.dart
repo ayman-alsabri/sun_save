@@ -2,6 +2,10 @@ part of 'words_bloc.dart';
 
 enum WordsStatus { initial, loading, loaded, failure }
 
+enum SpeakingStatus { idle, playing, paused }
+
+enum SpeakingMode { none, unsavedList, savedList, single }
+
 class WordsState extends Equatable {
   final WordsStatus status;
   final List<Word> words;
@@ -12,6 +16,10 @@ class WordsState extends Equatable {
   final Map<String, bool> showArById;
   final String? speakingWordId;
   final bool isShuffled;
+  final SpeakingStatus speakingStatus;
+  final SpeakingMode speakingMode;
+  final int speakingItemIndex;
+  final int speakingItemTotal;
   final String? message;
 
   const WordsState({
@@ -24,6 +32,10 @@ class WordsState extends Equatable {
     required this.showArById,
     required this.speakingWordId,
     required this.isShuffled,
+    required this.speakingStatus,
+    required this.speakingMode,
+    required this.speakingItemIndex,
+    required this.speakingItemTotal,
     this.message,
   });
 
@@ -38,6 +50,10 @@ class WordsState extends Equatable {
         showArById: const {},
         speakingWordId: null,
         isShuffled: false,
+        speakingStatus: SpeakingStatus.idle,
+        speakingMode: SpeakingMode.none,
+        speakingItemIndex: -1,
+        speakingItemTotal: 0,
       );
 
   WordsState copyWith({
@@ -50,6 +66,10 @@ class WordsState extends Equatable {
     Map<String, bool>? showArById,
     String? speakingWordId,
     bool? isShuffled,
+    SpeakingStatus? speakingStatus,
+    SpeakingMode? speakingMode,
+    int? speakingItemIndex,
+    int? speakingItemTotal,
     String? message,
   }) {
     return WordsState(
@@ -62,6 +82,10 @@ class WordsState extends Equatable {
       showArById: showArById ?? this.showArById,
       speakingWordId: speakingWordId,
       isShuffled: isShuffled ?? this.isShuffled,
+      speakingStatus: speakingStatus ?? this.speakingStatus,
+      speakingMode: speakingMode ?? this.speakingMode,
+      speakingItemIndex: speakingItemIndex ?? this.speakingItemIndex,
+      speakingItemTotal: speakingItemTotal ?? this.speakingItemTotal,
       message: message,
     );
   }
@@ -77,6 +101,10 @@ class WordsState extends Equatable {
     showArById,
     speakingWordId,
     isShuffled,
+    speakingStatus,
+    speakingMode,
+    speakingItemIndex,
+    speakingItemTotal,
     message,
   ];
 }

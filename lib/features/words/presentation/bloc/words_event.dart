@@ -95,3 +95,15 @@ class WordAdded extends WordsEvent {
   @override
   List<Object?> get props => [en, ar, addToSaved];
 }
+
+class SpeakPauseRequested extends WordsEvent {
+  const SpeakPauseRequested();
+}
+
+class SpeakResumeRequested extends WordsEvent {
+  const SpeakResumeRequested();
+}
+
+class SpeakStopRequested extends WordsEvent {
+  const SpeakStopRequested();
+}
