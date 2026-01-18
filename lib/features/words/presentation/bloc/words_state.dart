@@ -6,6 +6,26 @@ enum SpeakingStatus { idle, playing, paused }
 
 enum SpeakingMode { none, unsavedList, savedList, single }
 
+enum WordsMessageKey {
+  saved,
+  unsaved,
+  nothingToSpeak,
+  nothingToSpeakBothHidden,
+  ttsFailed,
+  failed,
+  loadFailed,
+}
+
+class WordsMessage extends Equatable {
+  final WordsMessageKey key;
+  final Map<String, Object?> args;
+
+  const WordsMessage(this.key, {this.args = const {}});
+
+  @override
+  List<Object?> get props => [key, args];
+}
+
 class WordsState extends Equatable {
   final WordsStatus status;
   final List<Word> words;
@@ -20,7 +40,7 @@ class WordsState extends Equatable {
   final SpeakingMode speakingMode;
   final int speakingItemIndex;
   final int speakingItemTotal;
-  final String? message;
+  final WordsMessage? message;
 
   const WordsState({
     required this.status,
@@ -70,7 +90,7 @@ class WordsState extends Equatable {
     SpeakingMode? speakingMode,
     int? speakingItemIndex,
     int? speakingItemTotal,
-    String? message,
+    WordsMessage? message,
   }) {
     return WordsState(
       status: status ?? this.status,

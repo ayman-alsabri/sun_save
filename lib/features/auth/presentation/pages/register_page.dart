@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sun_save/l10n/app_localizations.dart';
 
 import '../../../../app/router/app_router.dart';
 import '../bloc/auth_bloc.dart';
@@ -35,6 +36,8 @@ class _RegisterPageState extends State<RegisterPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return BlocListener<AuthBloc, AuthState>(
       listenWhen: (p, c) => p.status != c.status,
       listener: (context, state) {
@@ -50,7 +53,7 @@ class _RegisterPageState extends State<RegisterPage> {
         }
       },
       child: Scaffold(
-        appBar: AppBar(title: const Text('Register')),
+        appBar: AppBar(title: Text(l10n.registerTitle)),
         body: SafeArea(
           child: Padding(
             padding: const EdgeInsets.all(16),
@@ -72,7 +75,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'Create account',
+                    l10n.registerTitle,
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                       fontWeight: FontWeight.w700,
@@ -81,11 +84,11 @@ class _RegisterPageState extends State<RegisterPage> {
                   const SizedBox(height: 20),
                   TextFormField(
                     controller: _emailController,
-                    decoration: const InputDecoration(labelText: 'Email'),
+                    decoration: InputDecoration(labelText: l10n.emailLabel),
                     keyboardType: TextInputType.emailAddress,
                     validator: (v) {
                       final value = (v ?? '').trim();
-                      if (value.isEmpty) return 'Email is required';
+                      if (value.isEmpty) return l10n.validationTooShort;
                       if (!value.contains('@') || !value.contains('.')) {
                         return 'Enter a valid email';
                       }
@@ -95,7 +98,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   const SizedBox(height: 12),
                   TextFormField(
                     controller: _passwordController,
-                    decoration: const InputDecoration(labelText: 'Password'),
+                    decoration: InputDecoration(labelText: l10n.passwordLabel),
                     obscureText: true,
                     validator: (v) {
                       final value = v ?? '';
@@ -113,7 +116,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       return ElevatedButton(
                         onPressed: isLoading ? null : _submit,
                         child: Text(
-                          isLoading ? 'Please wait...' : 'Create account',
+                          isLoading ? 'Please wait...' : l10n.registerButton,
                         ),
                       );
                     },
@@ -123,7 +126,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     onPressed: () => Navigator.of(
                       context,
                     ).pushReplacementNamed(AppRoutes.login),
-                    child: const Text('Already have an account? Login'),
+                    child: Text(l10n.goToLogin),
                   ),
                 ],
               ),

@@ -5,5 +5,9 @@ class GetWords {
   final WordsRepository repository;
   const GetWords(this.repository);
 
-  Future<List<Word>> call() => repository.getWords();
+  Future<List<Word>> call() async {
+    // Compatibility: fetch first page.
+    final page = await repository.getWordsPage(limit: 50, offset: 0);
+    return page.items;
+  }
 }

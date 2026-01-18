@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sun_save/l10n/app_localizations.dart';
 
 import '../../../words/presentation/bloc/words_bloc.dart';
 
@@ -8,6 +9,8 @@ class TtsControlsBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return BlocBuilder<WordsBloc, WordsState>(
       buildWhen: (p, c) =>
           p.speakingStatus != c.speakingStatus ||
@@ -24,9 +27,9 @@ class TtsControlsBar extends StatelessWidget {
         final isPaused = state.speakingStatus == SpeakingStatus.paused;
 
         final title = switch (state.speakingMode) {
-          SpeakingMode.unsavedList => 'Speaking: Unsaved',
-          SpeakingMode.savedList => 'Speaking: Saved',
-          SpeakingMode.single => 'Speaking',
+          SpeakingMode.unsavedList => l10n.speakUnsaved,
+          SpeakingMode.savedList => l10n.speakSaved,
+          SpeakingMode.single => l10n.speak,
           SpeakingMode.none => '',
         };
 
@@ -52,29 +55,30 @@ class TtsControlsBar extends StatelessWidget {
                     ),
                   ),
                   IconButton(
-                    tooltip: isPlaying ? 'Pause' : 'Play',
+                    tooltip: isPlaying ? l10n.pause : l10n.play,
                     onPressed: () {
                       final bloc = context.read<WordsBloc>();
                       if (isPlaying) {
                         bloc.add(const SpeakPauseRequested());
                       } else {
-                        // Resume only (doesn't restart list).
-                        bloc.add(const SpeakResumeRequested());
+                        if (isPaused) {
+                          bloc.add(const SpeakResumeRequested());
+                        }
                       }
                     },
                     icon: Icon(isPlaying ? Icons.pause : Icons.play_arrow),
                   ),
                   IconButton(
-                    tooltip: 'Stop',
+                    tooltip: l10n.stop,
                     onPressed: () => context.read<WordsBloc>().add(
                       const SpeakStopRequested(),
                     ),
                     icon: const Icon(Icons.stop),
                   ),
                   if (isPaused)
-                    const Padding(
-                      padding: EdgeInsets.only(left: 4),
-                      child: Text('Paused'),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 4),
+                      child: Text(l10n.paused),
                     ),
                 ],
               ),

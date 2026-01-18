@@ -3,16 +3,13 @@ import 'package:flutter/material.dart';
 class AppTheme {
   static const _radius = 16.0;
 
-  static ThemeData light() {
-    return _base(ColorScheme.fromSeed(seedColor: Colors.deepPurple));
+  static ThemeData light({required Color seedColor}) {
+    return _base(ColorScheme.fromSeed(seedColor: seedColor));
   }
 
-  static ThemeData dark() {
+  static ThemeData dark({required Color seedColor}) {
     return _base(
-      ColorScheme.fromSeed(
-        seedColor: Colors.deepPurple,
-        brightness: Brightness.dark,
-      ),
+      ColorScheme.fromSeed(seedColor: seedColor, brightness: Brightness.dark),
     );
   }
 
@@ -47,6 +44,7 @@ class AppTheme {
         style: ElevatedButton.styleFrom(
           minimumSize: const Size.fromHeight(48),
           shape: shape,
+          backgroundColor: scheme.surfaceContainerHigh,
         ),
       ),
       floatingActionButtonTheme: FloatingActionButtonThemeData(shape: shape),

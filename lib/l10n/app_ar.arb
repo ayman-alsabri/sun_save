@@ -1,0 +1,115 @@
+{
+    "@@locale": "ar",
+    "appTitle": "سن سيف",
+    "wordsTitle": "الكلمات",
+    "unsavedTab": "غير محفوظة",
+    "savedTab": "محفوظة",
+    "settingsTitle": "الإعدادات",
+    "aboutTitle": "حول التطبيق",
+    "loginTitle": "تسجيل الدخول",
+    "registerTitle": "إنشاء حساب",
+    "logout": "تسجيل الخروج",
+    "emailLabel": "البريد الإلكتروني",
+    "passwordLabel": "كلمة المرور",
+    "nameLabel": "الاسم",
+    "loginButton": "دخول",
+    "registerButton": "إنشاء حساب",
+    "goToRegister": "إنشاء حساب جديد",
+    "goToLogin": "لدي حساب بالفعل",
+    "addWordTitle": "إضافة كلمة",
+    "englishLabel": "الإنجليزية",
+    "arabicLabel": "العربية",
+    "addToSaved": "إضافة إلى المحفوظة",
+    "addToUnsaved": "إضافة إلى غير المحفوظة",
+    "addWordFab": "أضف كلمة",
+    "autoTranslate": "ترجمة تلقائية",
+    "comingSoonTitle": "قريباً",
+    "ttsIterations": "تكرار النطق",
+    "appLanguage": "لغة التطبيق",
+    "theme": "المظهر",
+    "system": "النظام",
+    "light": "فاتح",
+    "dark": "داكن",
+    "english": "الإنجليزية",
+    "arabic": "العربية",
+    "speak": "نطق",
+    "speakSaved": "نطق المحفوظة",
+    "speakUnsaved": "نطق غير المحفوظة",
+    "shuffle": "ترتيب عشوائي",
+    "reshuffle": "إعادة العشوائية",
+    "resetOrder": "إعادة الترتيب",
+    "showEnglish": "إظهار الإنجليزية",
+    "showArabic": "إظهار العربية",
+    "hideEnglish": "إخفاء الإنجليزية",
+    "hideArabic": "إخفاء العربية",
+    "save": "حفظ",
+    "unsave": "إلغاء الحفظ",
+    "options": "الخيارات",
+    "snackSaved": "تم الحفظ",
+    "snackUnsaved": "تم الإلغاء",
+    "snackWordAdded": "تمت الإضافة",
+    "validationRequiredEnglish": "الكلمة الإنجليزية مطلوبة",
+    "validationRequiredArabic": "الترجمة العربية مطلوبة",
+    "validationTooShort": "قصير جداً",
+    "routeNotFound": "المسار غير موجود: {route}",
+    "@routeNotFound": {
+        "placeholders": {
+            "route": {
+                "type": "String"
+            }
+        }
+    },
+    "testTitle": "اختبار",
+    "typeWhatYouRemember": "اكتب ما تتذكر",
+    "close": "إغلاق",
+    "editWordTitle": "تعديل الكلمة",
+    "saveChanges": "حفظ التغييرات",
+    "cancel": "إلغاء",
+    "edit": "تعديل",
+    "delete": "حذف",
+    "correctAnswer": "صحيح!",
+    "wrongAnswer": "إجابة خاطئة. حاول مرة أخرى!",
+    "play": "تشغيل",
+    "pause": "إيقاف مؤقت",
+    "stop": "إيقاف",
+    "paused": "متوقف مؤقتًا",
+    "wordsMsgSaved": "تم الحفظ",
+    "wordsMsgUnsaved": "تمت الإزالة من المحفوظات",
+    "wordsMsgNothingToSpeak": "لا يوجد ما يمكن نطقه",
+    "wordsMsgNothingToSpeakBothHidden": "لا يوجد ما يمكن نطقه (كلاهما مخفي)",
+    "wordsMsgTtsFailed": "فشل النطق: {error}",
+    "@wordsMsgTtsFailed": {
+        "placeholders": {
+            "error": {
+                "type": "String"
+            }
+        }
+    },
+    "wordsMsgFailed": "فشل: {error}",
+    "@wordsMsgFailed": {
+        "placeholders": {
+            "error": {
+                "type": "String"
+            }
+        }
+    },
+    "wordsMsgLoadFailed": "فشل تحميل الكلمات: {error}",
+    "@wordsMsgLoadFailed": {
+        "placeholders": {
+            "error": {
+                "type": "String"
+            }
+        }
+    },
+    "notifications": "الإشعارات",
+    "wordsPerDay": "عدد الكلمات يوميًا",
+    "notifyStartTime": "وقت البدء",
+    "notifyEndTime": "وقت الانتهاء",
+    "applyNotificationSchedule": "تطبيق الجدول",
+    "noSavedWords": "لا توجد كلمات محفوظة",
+    "noUnsavedWords": "لا توجد كلمات غير محفوظة",
+    "autoTranslateError": "فشلت الترجمة",
+    "autoTranslateNoSuggestions": "لا توجد اقتراحات",
+    "notificationsChannelName": "تذكير الكلمات اليومية",
+    "notificationsChannelDescription": "تذكيرات للتدرب على الكلمات يوميًا"
+}

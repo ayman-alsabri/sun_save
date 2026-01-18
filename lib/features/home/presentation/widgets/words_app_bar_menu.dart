@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sun_save/l10n/app_localizations.dart';
 
 import '../../../words/presentation/bloc/words_bloc.dart';
 
@@ -8,6 +9,8 @@ class WordsAppBarMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return BlocBuilder<WordsBloc, WordsState>(
       buildWhen: (p, c) =>
           p.showEn != c.showEn ||
@@ -15,36 +18,36 @@ class WordsAppBarMenu extends StatelessWidget {
           p.isShuffled != c.isShuffled,
       builder: (context, state) {
         return PopupMenuButton<String>(
-          tooltip: 'Options',
+          tooltip: l10n.options,
           itemBuilder: (context) => [
             CheckedPopupMenuItem<String>(
               value: 'toggle_en',
               checked: state.showEn,
-              child: const Text('Show English'),
+              child: Text(l10n.showEnglish),
             ),
             CheckedPopupMenuItem<String>(
               value: 'toggle_ar',
               checked: state.showAr,
-              child: const Text('Show Arabic'),
+              child: Text(l10n.showArabic),
             ),
             const PopupMenuDivider(),
             PopupMenuItem<String>(
               value: 'shuffle',
-              child: Text(state.isShuffled ? 'Reshuffle' : 'Shuffle'),
+              child: Text(state.isShuffled ? l10n.reshuffle : l10n.shuffle),
             ),
             PopupMenuItem<String>(
               value: 'reset_order',
               enabled: state.isShuffled,
-              child: const Text('Reset order'),
+              child: Text(l10n.resetOrder),
             ),
             const PopupMenuDivider(),
-            const PopupMenuItem<String>(
+            PopupMenuItem<String>(
               value: 'speak_unsaved',
-              child: Text('Speak Unsaved'),
+              child: Text(l10n.speakUnsaved),
             ),
-            const PopupMenuItem<String>(
+            PopupMenuItem<String>(
               value: 'speak_saved',
-              child: Text('Speak Saved'),
+              child: Text(l10n.speakSaved),
             ),
           ],
           onSelected: (value) {

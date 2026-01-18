@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:sun_save/l10n/app_localizations.dart';
 
-import '../../../../app/router/app_router.dart';
+import 'auto_translate_widget.dart';
 
 class AddWordResult {
   final String en;
@@ -47,6 +48,7 @@ class _AddWordBottomSheetState extends State<AddWordBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final hasEnglish = _enController.text.trim().isNotEmpty;
 
     return Padding(
@@ -63,7 +65,7 @@ class _AddWordBottomSheetState extends State<AddWordBottomSheet> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              'Add a word',
+              l10n.addWordTitle,
               style: Theme.of(
                 context,
               ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
@@ -71,55 +73,42 @@ class _AddWordBottomSheetState extends State<AddWordBottomSheet> {
             const SizedBox(height: 12),
             TextFormField(
               controller: _enController,
-              decoration: const InputDecoration(
-                labelText: 'English',
-                prefixIcon: Icon(Icons.abc),
+              decoration: InputDecoration(
+                labelText: l10n.englishLabel,
+                prefixIcon: const Icon(Icons.abc),
               ),
               textInputAction: TextInputAction.next,
               onChanged: (_) => setState(() {}),
               validator: (v) {
                 final value = (v ?? '').trim();
-                if (value.isEmpty) return 'English word is required';
-                if (value.length < 2) return 'Too short';
+                if (value.isEmpty) return l10n.validationRequiredEnglish;
+                if (value.length < 2) return l10n.validationTooShort;
                 return null;
               },
             ),
             const SizedBox(height: 12),
             TextFormField(
               controller: _arController,
-              decoration: const InputDecoration(
-                labelText: 'Arabic',
-                prefixIcon: Icon(Icons.translate),
+              decoration: InputDecoration(
+                labelText: l10n.arabicLabel,
+                prefixIcon: const Icon(Icons.translate),
               ),
               textInputAction: TextInputAction.done,
               validator: (v) {
                 final value = (v ?? '').trim();
-                if (value.isEmpty) return 'Arabic translation is required';
-                if (value.length < 2) return 'Too short';
+                if (value.isEmpty) return l10n.validationRequiredArabic;
+                if (value.length < 2) return l10n.validationTooShort;
                 return null;
               },
             ),
             const SizedBox(height: 8),
             if (hasEnglish)
-              Align(
-                alignment: Alignment.centerLeft,
-                child: TextButton(
-                  onPressed: () {
-                    final en = _enController.text;
-
-                    // Close the bottom sheet first to avoid controller usage after dispose.
-                    Navigator.of(context).pop();
-
-                    // Navigate after the sheet is removed.
-                    WidgetsBinding.instance.addPostFrameCallback((_) {
-                      if (!context.mounted) return;
-                      Navigator.of(
-                        context,
-                      ).pushNamed(AppRoutes.autoTranslate, arguments: en);
-                    });
-                  },
-                  child: const Text('Auto translate'),
-                ),
+              AutoTranslateWidget(
+                enController: _enController,
+                onTranslationClicked: (ar) {
+                  _arController.text = ar;
+                  setState(() {});
+                },
               ),
             const SizedBox(height: 8),
             ElevatedButton.icon(
@@ -135,7 +124,7 @@ class _AddWordBottomSheetState extends State<AddWordBottomSheet> {
               },
               icon: const Icon(Icons.add),
               label: Text(
-                widget.addToSaved ? 'Add to Saved' : 'Add to Unsaved',
+                widget.addToSaved ? l10n.addToSaved : l10n.addToUnsaved,
               ),
             ),
           ],

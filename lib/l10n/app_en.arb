@@ -1,0 +1,115 @@
+{
+    "@@locale": "en",
+    "appTitle": "Sun Save",
+    "wordsTitle": "Words",
+    "unsavedTab": "Unsaved",
+    "savedTab": "Saved",
+    "settingsTitle": "Settings",
+    "aboutTitle": "About",
+    "loginTitle": "Login",
+    "registerTitle": "Register",
+    "logout": "Logout",
+    "emailLabel": "Email",
+    "passwordLabel": "Password",
+    "nameLabel": "Name",
+    "loginButton": "Login",
+    "registerButton": "Create account",
+    "goToRegister": "Create an account",
+    "goToLogin": "I already have an account",
+    "addWordTitle": "Add a word",
+    "englishLabel": "English",
+    "arabicLabel": "Arabic",
+    "addToSaved": "Add to Saved",
+    "addToUnsaved": "Add to Unsaved",
+    "addWordFab": "Add a word",
+    "autoTranslate": "Auto translate",
+    "comingSoonTitle": "Coming soon",
+    "ttsIterations": "TTS iterations",
+    "appLanguage": "App language",
+    "theme": "Theme",
+    "system": "System",
+    "light": "Light",
+    "dark": "Dark",
+    "english": "English",
+    "arabic": "Arabic",
+    "speak": "Speak",
+    "speakSaved": "Speak Saved",
+    "speakUnsaved": "Speak Unsaved",
+    "shuffle": "Shuffle",
+    "reshuffle": "Reshuffle",
+    "resetOrder": "Reset order",
+    "showEnglish": "Show English",
+    "showArabic": "Show Arabic",
+    "hideEnglish": "Hide English",
+    "hideArabic": "Hide Arabic",
+    "save": "Save",
+    "unsave": "Unsave",
+    "options": "Options",
+    "snackSaved": "Saved",
+    "snackUnsaved": "Unsaved",
+    "snackWordAdded": "Word added",
+    "validationRequiredEnglish": "English word is required",
+    "validationRequiredArabic": "Arabic translation is required",
+    "validationTooShort": "Too short",
+    "routeNotFound": "Route not found: {route}",
+    "@routeNotFound": {
+        "placeholders": {
+            "route": {
+                "type": "String"
+            }
+        }
+    },
+    "testTitle": "Test",
+    "typeWhatYouRemember": "Type what you remember",
+    "close": "Close",
+    "editWordTitle": "Edit word",
+    "saveChanges": "Save changes",
+    "cancel": "Cancel",
+    "edit": "Edit",
+    "delete": "Delete",
+    "correctAnswer": "Correct!",
+    "wrongAnswer": "Wrong answer. Try again!",
+    "play": "Play",
+    "pause": "Pause",
+    "stop": "Stop",
+    "paused": "Paused",
+    "wordsMsgSaved": "Saved",
+    "wordsMsgUnsaved": "Unsaved",
+    "wordsMsgNothingToSpeak": "Nothing to speak",
+    "wordsMsgNothingToSpeakBothHidden": "Nothing to speak (both hidden)",
+    "wordsMsgTtsFailed": "TTS failed: {error}",
+    "@wordsMsgTtsFailed": {
+        "placeholders": {
+            "error": {
+                "type": "String"
+            }
+        }
+    },
+    "wordsMsgFailed": "Failed: {error}",
+    "@wordsMsgFailed": {
+        "placeholders": {
+            "error": {
+                "type": "String"
+            }
+        }
+    },
+    "wordsMsgLoadFailed": "Failed to load words: {error}",
+    "@wordsMsgLoadFailed": {
+        "placeholders": {
+            "error": {
+                "type": "String"
+            }
+        }
+    },
+    "notifications": "Notifications",
+    "wordsPerDay": "Words per day",
+    "notifyStartTime": "Start time",
+    "notifyEndTime": "End time",
+    "applyNotificationSchedule": "Apply schedule",
+    "noSavedWords": "No saved words",
+    "noUnsavedWords": "No unsaved words",
+    "autoTranslateError": "Translation failed",
+    "autoTranslateNoSuggestions": "No suggestions",
+    "notificationsChannelName": "Daily words",
+    "notificationsChannelDescription": "Daily word practice reminders"
+}

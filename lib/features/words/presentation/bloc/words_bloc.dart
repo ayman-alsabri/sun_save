@@ -2,15 +2,19 @@ import 'dart:math';
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../../../core/services/app_settings.dart';
+import '../../../../core/services/notifications_service.dart';
 import '../../../../core/services/settings_local_data_source.dart';
 import '../../../../core/services/tts_service.dart';
 import '../../domain/entities/word.dart';
 import '../../domain/usecases/add_word.dart';
+import '../../domain/usecases/delete_word.dart';
 import '../../domain/usecases/get_saved_word_ids.dart';
 import '../../domain/usecases/get_words.dart';
 import '../../domain/usecases/set_word_saved.dart';
+import '../../domain/usecases/update_word.dart';
 
 part 'words_event.dart';
 part 'words_state.dart';
@@ -20,8 +24,11 @@ class WordsBloc extends Bloc<WordsEvent, WordsState> {
   final GetSavedWordIds getSavedWordIds;
   final SetWordSaved setWordSaved;
   final AddWord addWord;
+  final UpdateWord updateWord;
+  final DeleteWord deleteWord;
   final TtsService tts;
   final SettingsLocalDataSource settingsLocal;
+  final NotificationsService notifications;
 
   List<Word> _originalWords = const [];
 
@@ -30,8 +37,11 @@ class WordsBloc extends Bloc<WordsEvent, WordsState> {
     required this.getSavedWordIds,
     required this.setWordSaved,
     required this.addWord,
+    required this.updateWord,
+    required this.deleteWord,
     required this.tts,
     required this.settingsLocal,
+    required this.notifications,
   }) : super(const WordsState.initial()) {
     on<WordsRequested>(_onWordsRequested);
     on<WordsSavedIdsRequested>(_onSavedIdsRequested);
@@ -45,6 +55,8 @@ class WordsBloc extends Bloc<WordsEvent, WordsState> {
     on<WordsShuffleRequested>(_onShuffleRequested);
     on<WordsResetOrderRequested>(_onResetOrderRequested);
     on<WordAdded>(_onWordAdded);
+    on<WordUpdated>(_onWordUpdated);
+    on<WordDeleted>(_onWordDeleted);
     on<SpeakPauseRequested>(_onSpeakPauseRequested);
     on<SpeakResumeRequested>(_onSpeakResumeRequested);
     on<SpeakStopRequested>(_onSpeakStopRequested);
@@ -54,7 +66,7 @@ class WordsBloc extends Bloc<WordsEvent, WordsState> {
     WordsRequested event,
     Emitter<WordsState> emit,
   ) async {
-    emit(state.copyWith(status: WordsStatus.loading, message: null));
+    emit(state.copyWith(status: WordsStatus.loading));
     try {
       final words = await getWords();
       _originalWords = words;
@@ -65,10 +77,19 @@ class WordsBloc extends Bloc<WordsEvent, WordsState> {
           words: words,
           savedIds: savedIds,
           isShuffled: false,
+          message: null,
         ),
       );
     } catch (e) {
-      emit(state.copyWith(status: WordsStatus.failure, message: e.toString()));
+      emit(
+        state.copyWith(
+          status: WordsStatus.failure,
+          message: WordsMessage(
+            WordsMessageKey.loadFailed,
+            args: {'error': e.toString()},
+          ),
+        ),
+      );
     }
   }
 
@@ -99,11 +120,20 @@ class WordsBloc extends Bloc<WordsEvent, WordsState> {
       emit(
         state.copyWith(
           savedIds: next,
-          message: event.saved ? 'Saved' : 'Unsaved',
+          message: WordsMessage(
+            event.saved ? WordsMessageKey.saved : WordsMessageKey.unsaved,
+          ),
         ),
       );
     } catch (e) {
-      emit(state.copyWith(message: 'Failed: ${e.toString()}'));
+      emit(
+        state.copyWith(
+          message: WordsMessage(
+            WordsMessageKey.failed,
+            args: {'error': e.toString()},
+          ),
+        ),
+      );
     }
   }
 
@@ -129,13 +159,8 @@ class WordsBloc extends Bloc<WordsEvent, WordsState> {
 
   Future<AppSettings> _settings() => settingsLocal.read();
 
-  SpeechLang _speechLangForApp(AppLanguage appLang, SpeechLang fallback) {
-    return switch (appLang) {
-      AppLanguage.en => SpeechLang.en,
-      AppLanguage.ar => SpeechLang.ar,
-      AppLanguage.system => fallback,
-    };
-  }
+  // NOTE: Auto-rescheduling notifications from the bloc would require l10n.
+  // Scheduling is currently handled from Settings where AppLocalizations exists.
 
   Future<void> _onSpeakWordRequested(
     SpeakWordRequested event,
@@ -151,20 +176,18 @@ class WordsBloc extends Bloc<WordsEvent, WordsState> {
 
     final items = <({String text, SpeechLang lang})>[];
     if (showEn) {
-      items.add((
-        text: word.en,
-        lang: _speechLangForApp(settings.language, SpeechLang.en),
-      ));
+      items.add((text: word.en, lang: SpeechLang.en));
     }
     if (showAr) {
-      items.add((
-        text: word.ar,
-        lang: _speechLangForApp(settings.language, SpeechLang.ar),
-      ));
+      items.add((text: word.ar, lang: SpeechLang.ar));
     }
 
     if (items.isEmpty) {
-      emit(state.copyWith(message: 'Nothing to speak (both hidden)'));
+      emit(
+        state.copyWith(
+          message: const WordsMessage(WordsMessageKey.nothingToSpeakBothHidden),
+        ),
+      );
       return;
     }
 
@@ -176,12 +199,20 @@ class WordsBloc extends Bloc<WordsEvent, WordsState> {
           speakingMode: SpeakingMode.single,
           speakingItemIndex: 0,
           speakingItemTotal: 1,
+          message: null,
         ),
       );
 
       await tts.speakSequence(items, iterations: settings.ttsIterations);
     } catch (e) {
-      emit(state.copyWith(message: 'TTS failed: ${e.toString()}'));
+      emit(
+        state.copyWith(
+          message: WordsMessage(
+            WordsMessageKey.ttsFailed,
+            args: {'error': e.toString()},
+          ),
+        ),
+      );
     } finally {
       emit(
         state.copyWith(
@@ -211,7 +242,11 @@ class WordsBloc extends Bloc<WordsEvent, WordsState> {
     }
 
     if (listWords.isEmpty) {
-      emit(state.copyWith(message: 'Nothing to speak'));
+      emit(
+        state.copyWith(
+          message: const WordsMessage(WordsMessageKey.nothingToSpeak),
+        ),
+      );
       return;
     }
 
@@ -224,6 +259,7 @@ class WordsBloc extends Bloc<WordsEvent, WordsState> {
         speakingItemIndex: 0,
         speakingItemTotal: listWords.length,
         speakingWordId: listWords.first.id,
+        message: null,
       ),
     );
 
@@ -238,16 +274,10 @@ class WordsBloc extends Bloc<WordsEvent, WordsState> {
 
         final items = <({String text, SpeechLang lang})>[];
         if (showEn) {
-          items.add((
-            text: word.en,
-            lang: _speechLangForApp(settings.language, SpeechLang.en),
-          ));
+          items.add((text: word.en, lang: SpeechLang.en));
         }
         if (showAr) {
-          items.add((
-            text: word.ar,
-            lang: _speechLangForApp(settings.language, SpeechLang.ar),
-          ));
+          items.add((text: word.ar, lang: SpeechLang.ar));
         }
 
         if (items.isEmpty) continue;
@@ -266,7 +296,14 @@ class WordsBloc extends Bloc<WordsEvent, WordsState> {
         await tts.speakSequence(items, iterations: settings.ttsIterations);
       }
     } catch (e) {
-      emit(state.copyWith(message: 'TTS failed: ${e.toString()}'));
+      emit(
+        state.copyWith(
+          message: WordsMessage(
+            WordsMessageKey.ttsFailed,
+            args: {'error': e.toString()},
+          ),
+        ),
+      );
     } finally {
       emit(
         state.copyWith(
@@ -300,7 +337,7 @@ class WordsBloc extends Bloc<WordsEvent, WordsState> {
       await tts.resume();
       emit(state.copyWith(speakingStatus: SpeakingStatus.playing));
     } catch (_) {
-      // ignore
+      // ignore (platform may not support resume)
     }
   }
 
@@ -318,6 +355,7 @@ class WordsBloc extends Bloc<WordsEvent, WordsState> {
           speakingMode: SpeakingMode.none,
           speakingItemIndex: -1,
           speakingItemTotal: 0,
+          message: null,
         ),
       );
     }
@@ -348,28 +386,53 @@ class WordsBloc extends Bloc<WordsEvent, WordsState> {
   }
 
   Future<void> _onWordAdded(WordAdded event, Emitter<WordsState> emit) async {
+    final newWord = Word(id: const Uuid().v4(), en: event.en, ar: event.ar);
     try {
-      final now = DateTime.now().millisecondsSinceEpoch;
-      final id = 'custom_$now';
-      final word = Word(id: id, en: event.en.trim(), ar: event.ar.trim());
-
-      await addWord(word);
-      if (event.addToSaved) {
-        await setWordSaved(wordId: id, saved: true);
-      }
-
-      final words = await getWords();
-      _originalWords = words;
-      final savedIds = await getSavedWordIds();
-      emit(
-        state.copyWith(words: words, savedIds: savedIds, message: 'Word added'),
-      );
+      await addWord(newWord);
+      final newWords = [newWord, ...state.words];
+      _originalWords = [newWord, ..._originalWords];
+      emit(state.copyWith(words: newWords));
     } catch (e) {
-      emit(state.copyWith(message: 'Add failed: ${e.toString()}'));
+      // Error handling TODO
     }
   }
-}
 
-extension<T> on Iterable<T> {
-  T? get firstOrNull => isEmpty ? null : first;
+  Future<void> _onWordUpdated(
+    WordUpdated event,
+    Emitter<WordsState> emit,
+  ) async {
+    try {
+      await updateWord(event.word);
+      final newWords = state.words.map((w) {
+        return w.id == event.word.id ? event.word : w;
+      }).toList();
+
+      _originalWords = _originalWords.map((w) {
+        return w.id == event.word.id ? event.word : w;
+      }).toList();
+
+      emit(state.copyWith(words: newWords));
+    } catch (e) {
+      // Error handling TODO
+    }
+  }
+
+  Future<void> _onWordDeleted(
+    WordDeleted event,
+    Emitter<WordsState> emit,
+  ) async {
+    try {
+      await deleteWord(event.wordId);
+      final newWords = state.words.where((w) => w.id != event.wordId).toList();
+      _originalWords = _originalWords
+          .where((w) => w.id != event.wordId)
+          .toList();
+
+      // Also ensure savedIds doesn't keep a deleted id.
+      final nextSaved = state.savedIds.toSet()..remove(event.wordId);
+      emit(state.copyWith(words: newWords, savedIds: nextSaved));
+    } catch (e) {
+      // Error handling TODO
+    }
+  }
 }

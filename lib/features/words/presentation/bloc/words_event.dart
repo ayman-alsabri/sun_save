@@ -96,6 +96,22 @@ class WordAdded extends WordsEvent {
   List<Object?> get props => [en, ar, addToSaved];
 }
 
+class WordUpdated extends WordsEvent {
+  final Word word;
+  const WordUpdated(this.word);
+
+  @override
+  List<Object?> get props => [word];
+}
+
+class WordDeleted extends WordsEvent {
+  final String wordId;
+  const WordDeleted(this.wordId);
+
+  @override
+  List<Object?> get props => [wordId];
+}
+
 class SpeakPauseRequested extends WordsEvent {
   const SpeakPauseRequested();
 }

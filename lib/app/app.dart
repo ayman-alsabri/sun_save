@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 import '../core/services/app_settings.dart';
 import '../features/auth/presentation/bloc/auth_bloc.dart';
 import '../features/settings/presentation/bloc/settings_cubit.dart';
 import '../features/words/presentation/bloc/words_bloc.dart';
+import '../l10n/app_localizations.dart';
 import 'di/injection_container.dart';
 import 'router/app_router.dart';
 import 'theme/app_theme.dart';
@@ -28,12 +30,26 @@ class SunSaveApp extends StatelessWidget {
             AppThemeMode.dark => ThemeMode.dark,
           };
 
+          final Locale? locale = switch (settings.language) {
+            AppLanguage.system => null,
+            AppLanguage.en => const Locale('en'),
+            AppLanguage.ar => const Locale('ar'),
+          };
+
           return MaterialApp(
             debugShowCheckedModeBanner: false,
             title: 'Sun Save',
-            theme: AppTheme.light(),
-            darkTheme: AppTheme.dark(),
+            theme: AppTheme.light(seedColor: settings.seedColor),
+            darkTheme: AppTheme.dark(seedColor: settings.seedColor),
             themeMode: mode,
+            locale: locale,
+            supportedLocales: AppLocalizations.supportedLocales,
+            localizationsDelegates: [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
             initialRoute: AppRoutes.splash,
             onGenerateRoute: AppRouter.onGenerateRoute,
           );

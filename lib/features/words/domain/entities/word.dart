@@ -7,6 +7,10 @@ class Word extends Equatable {
 
   const Word({required this.id, required this.en, required this.ar});
 
+  Word copyWith({String? id, String? en, String? ar}) {
+    return Word(id: id ?? this.id, en: en ?? this.en, ar: ar ?? this.ar);
+  }
+
   @override
   List<Object?> get props => [id, en, ar];
 }

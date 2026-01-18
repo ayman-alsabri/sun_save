@@ -16,17 +16,47 @@ typedef SpeechStateChanged = void Function(bool isPlaying);
 class TtsService {
   final FlutterTts _tts;
 
+  // Internal state for flow control
+  bool _isStopped = false;
+  bool _isPaused = false;
+  Completer<void>? _resumeSignal;
+
+  // State to track current speech context
+  String? currentText;
+  SpeechLang? currentLang;
+
   TtsService(this._tts);
 
-  Future<void> stop() => _tts.stop();
+  Future<void> stop() async {
+    _isStopped = true;
+    _isPaused = false;
+    _unlockResume();
+    await _tts.stop();
+  }
 
-  Future<void> pause() => _tts.pause();
+  Future<void> pause() async {
+    _isPaused = true;
+    if (_resumeSignal == null || _resumeSignal!.isCompleted) {
+      _resumeSignal = Completer<void>();
+    }
+    // We stop the actual audio because most engines don't support
+    // mid-sentence resume reliably without the specific resume method.
+    await _tts.stop();
+  }
 
   Future<void> resume() async {
-    // continueHandler is only supported on some platforms.
-    final handler = _tts.continueHandler;
-    if (handler != null) {
-      handler();
+    if (_isPaused) {
+      _isPaused = false;
+      _unlockResume();
+      // We don't call _tts.resume() here. The loop logic handles
+      // restarting the current item.
+    }
+  }
+
+  void _unlockResume() {
+    if (_resumeSignal != null && !_resumeSignal!.isCompleted) {
+      _resumeSignal!.complete();
+      _resumeSignal = null;
     }
   }
 
@@ -36,10 +66,10 @@ class TtsService {
 
   Future<void> speak(String text, {SpeechLang lang = SpeechLang.en}) async {
     if (text.trim().isEmpty) return;
-
+    currentText = text;
+    currentLang = lang;
     await _setupAwaitCompletion();
 
-    // Best-effort language selection.
     switch (lang) {
       case SpeechLang.en:
         await _tts.setLanguage('en-US');
@@ -54,7 +84,6 @@ class TtsService {
     await _tts.speak(text);
   }
 
-  /// Speaks items sequentially and reliably awaits each utterance.
   Future<void> speakSequence(
     List<({String text, SpeechLang lang})> items, {
     int iterations = 1,
@@ -63,27 +92,28 @@ class TtsService {
     SpeechDone? onDone,
     SpeechError? onError,
   }) async {
+    // 1. Reset state
     await stop();
+    _isStopped = false;
+    _isPaused = false;
+    _resumeSignal = null;
 
-    // Some platforms need setAwaitSpeakCompletion before speaking.
     await _setupAwaitCompletion();
 
     final total = items.length;
     if (total == 0) return;
 
-    // Use a completion completer to ensure we really wait for each item.
     Completer<void>? completion;
+
+    // 2. Setup Handlers
     _tts.setCompletionHandler(() {
       completion?.complete();
-      completion = null;
     });
     _tts.setCancelHandler(() {
       completion?.complete();
-      completion = null;
     });
     _tts.setErrorHandler((msg) {
       completion?.completeError(Exception(msg));
-      completion = null;
     });
 
     try {
@@ -91,17 +121,39 @@ class TtsService {
       final iters = iterations.clamp(1, 10);
 
       for (var iter = 0; iter < iters; iter++) {
+        if (_isStopped) break;
+
         for (var i = 0; i < items.length; i++) {
+          if (_isStopped) break;
+
+          // PAUSE CHECK (Before speaking)
+          if (_isPaused) {
+            await _resumeSignal?.future;
+            if (_isStopped) break;
+          }
+
           onProgress?.call(i, total);
           final item = items[i];
 
           completion = Completer<void>();
+
           await speak(item.text, lang: item.lang);
-          await completion!.future;
+
+          // Wait for utterance to finish (or be stopped by pause)
+          await completion.future;
+
+          // PAUSE CHECK (After speaking/interruption)
+          // If we are paused here, it means stop() was called mid-speech.
+          // We decrement i so that when we resume, we retry the SAME item.
+          if (_isPaused) {
+            i--;
+          }
         }
       }
 
-      onDone?.call();
+      if (!_isStopped) {
+        onDone?.call();
+      }
     } catch (e) {
       onError?.call(e);
       rethrow;

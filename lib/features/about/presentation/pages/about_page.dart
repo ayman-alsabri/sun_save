@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:sun_save/l10n/app_localizations.dart';
 
 class AboutPage extends StatelessWidget {
   const AboutPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return Scaffold(
-      appBar: AppBar(title: const Text('About')),
+      appBar: AppBar(title: Text(l10n.aboutTitle)),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -22,7 +25,7 @@ class AboutPage extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            'Sun Save',
+            l10n.appTitle,
             textAlign: TextAlign.center,
             style: Theme.of(
               context,
