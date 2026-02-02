@@ -1,7 +1,30 @@
 {
     "@@locale": "ar",
     "appTitle": "سن سيف",
-    "wordsTitle": "الكلمات",
+    "greetingMorning": "صباحك جميل، {username}",
+    "@greetingMorning": {
+        "placeholders": {
+            "username": {
+                "type": "String"
+            }
+        }
+    },
+    "greetingAfternoon": "مساءك سعيد، {username}",
+    "@greetingAfternoon": {
+        "placeholders": {
+            "username": {
+                "type": "String"
+            }
+        }
+    },
+    "greetingFriday": "جمعتك مباركة، {username}",
+    "@greetingFriday": {
+        "placeholders": {
+            "username": {
+                "type": "String"
+            }
+        }
+    },
     "unsavedTab": "غير محفوظة",
     "savedTab": "محفوظة",
     "settingsTitle": "الإعدادات",
@@ -111,5 +134,26 @@
     "autoTranslateError": "فشلت الترجمة",
     "autoTranslateNoSuggestions": "لا توجد اقتراحات",
     "notificationsChannelName": "تذكير الكلمات اليومية",
-    "notificationsChannelDescription": "تذكيرات للتدرب على الكلمات يوميًا"
+    "notificationsChannelDescription": "تذكيرات للتدرب على الكلمات يوميًا",
+    "drawerProfile": "الملف الشخصي",
+    "drawerSettings": "الإعدادات",
+    "notificationScheduleApplied": "تم تطبيق جدول الإشعارات على {count} كلمات",
+    "@notificationScheduleApplied": {
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "drawerAbout": "حول سن سيف",
+    "drawerLogout": "تسجيل الخروج",
+    "loginGreeting": "مرحبًا! ما اسمك؟",
+    "loginSubtitle": "أخبرنا باسمك لنخصّص تجربتك داخل التطبيق.",
+    "loginNameRequired": "يرجى إدخال اسمك للمتابعة",
+    "continueText": "متابعة",
+    "aboutDescription": "سن سيف مخصّص لكل من يريد حفظ كلمات جديدة ومراجعتها لاحقًا. هدفي هو مساعدتك على بناء مفرداتك—كلمة واحدة في كل مرة.",
+    "tipsTitle": "نصائح مفيدة",
+    "tipHideShowGlobal": "• استخدم القائمة لإظهار أو إخفاء الإنجليزية أو العربية في التطبيق بالكامل.",
+    "tipHideShowPerWord": "• استخدم الخيارات على كل كلمة لإظهارها أو إخفائها بشكل فردي.",
+    "tipSpeakLists": "• استخدم ميزة النطق للاستماع إلى كلماتك المحفوظة أو غير المحفوظة لمراجعة سريعة."
 }

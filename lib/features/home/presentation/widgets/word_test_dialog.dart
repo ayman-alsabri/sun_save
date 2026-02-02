@@ -19,6 +19,15 @@ class WordTestDialog extends StatefulWidget {
 class _WordTestDialogState extends State<WordTestDialog> {
   final _controller = TextEditingController();
 
+  String _normalize(String s) {
+    return s
+        .replaceAll(RegExp(r'[\u200B-\u200D\uFEFF]'), '') // zero-width chars
+        .replaceAll('\u00A0', ' ') // non-breaking space -> normal space
+        .trim()
+        .replaceAll(RegExp(r'\s+'), ' ') // collapse multi spaces
+        .toLowerCase();
+  }
+
   @override
   void dispose() {
     _controller.dispose();
@@ -54,7 +63,7 @@ class _WordTestDialogState extends State<WordTestDialog> {
         TextButton(
           onPressed: () => Navigator.of(
             context,
-          ).pop(_controller.text.trim() == widget.correctAr),
+          ).pop(_normalize(_controller.text) == _normalize(widget.correctEn)),
           child: Text(l10n.testTitle),
         ),
       ],

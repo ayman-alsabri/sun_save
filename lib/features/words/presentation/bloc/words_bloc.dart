@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:sun_save/app/di/injection_container.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../../core/services/app_settings.dart';
@@ -11,7 +12,6 @@ import '../../../../core/services/tts_service.dart';
 import '../../domain/entities/word.dart';
 import '../../domain/usecases/add_word.dart';
 import '../../domain/usecases/delete_word.dart';
-import '../../domain/usecases/get_saved_word_ids.dart';
 import '../../domain/usecases/get_words.dart';
 import '../../domain/usecases/set_word_saved.dart';
 import '../../domain/usecases/update_word.dart';
@@ -21,7 +21,6 @@ part 'words_state.dart';
 
 class WordsBloc extends Bloc<WordsEvent, WordsState> {
   final GetWords getWords;
-  final GetSavedWordIds getSavedWordIds;
   final SetWordSaved setWordSaved;
   final AddWord addWord;
   final UpdateWord updateWord;
@@ -34,7 +33,6 @@ class WordsBloc extends Bloc<WordsEvent, WordsState> {
 
   WordsBloc({
     required this.getWords,
-    required this.getSavedWordIds,
     required this.setWordSaved,
     required this.addWord,
     required this.updateWord,
@@ -44,7 +42,6 @@ class WordsBloc extends Bloc<WordsEvent, WordsState> {
     required this.notifications,
   }) : super(const WordsState.initial()) {
     on<WordsRequested>(_onWordsRequested);
-    on<WordsSavedIdsRequested>(_onSavedIdsRequested);
     on<WordSavedToggled>(_onSavedToggled);
     on<WordsShowEnToggled>(_onShowEnAllToggled);
     on<WordsShowArToggled>(_onShowArAllToggled);
@@ -70,12 +67,10 @@ class WordsBloc extends Bloc<WordsEvent, WordsState> {
     try {
       final words = await getWords();
       _originalWords = words;
-      final savedIds = await getSavedWordIds();
       emit(
         state.copyWith(
           status: WordsStatus.loaded,
           words: words,
-          savedIds: savedIds,
           isShuffled: false,
           message: null,
         ),
@@ -93,33 +88,25 @@ class WordsBloc extends Bloc<WordsEvent, WordsState> {
     }
   }
 
-  Future<void> _onSavedIdsRequested(
-    WordsSavedIdsRequested event,
-    Emitter<WordsState> emit,
-  ) async {
-    try {
-      final savedIds = await getSavedWordIds();
-      emit(state.copyWith(savedIds: savedIds));
-    } catch (_) {
-      // ignore
-    }
-  }
-
   Future<void> _onSavedToggled(
     WordSavedToggled event,
     Emitter<WordsState> emit,
   ) async {
     try {
       await setWordSaved(wordId: event.wordId, saved: event.saved);
-      final next = state.savedIds.toSet();
       if (event.saved) {
-        next.add(event.wordId);
-      } else {
-        next.remove(event.wordId);
+        await notifications.plugin.cancel(event.wordId.hashCode);
       }
+
+      final nextWords = state.words
+          .map(
+            (w) => w.id == event.wordId ? w.copyWith(isSaved: event.saved) : w,
+          )
+          .toList(growable: false);
+
       emit(
         state.copyWith(
-          savedIds: next,
+          words: nextWords,
           message: WordsMessage(
             event.saved ? WordsMessageKey.saved : WordsMessageKey.unsaved,
           ),
@@ -138,11 +125,11 @@ class WordsBloc extends Bloc<WordsEvent, WordsState> {
   }
 
   void _onShowEnAllToggled(WordsShowEnToggled event, Emitter<WordsState> emit) {
-    emit(state.copyWith(showEn: event.show));
+    emit(state.copyWith(showEn: event.show, showEnById: {}));
   }
 
   void _onShowArAllToggled(WordsShowArToggled event, Emitter<WordsState> emit) {
-    emit(state.copyWith(showAr: event.show));
+    emit(state.copyWith(showAr: event.show, showArById: {}));
   }
 
   void _onShowEnOneToggled(WordShowEnToggled event, Emitter<WordsState> emit) {
@@ -235,7 +222,7 @@ class WordsBloc extends Bloc<WordsEvent, WordsState> {
     // Build the list of words in the requested tab.
     final listWords = <Word>[];
     for (final w in state.words) {
-      final isSaved = state.savedIds.contains(w.id);
+      final isSaved = w.isSaved;
       if (event.savedOnly && !isSaved) continue;
       if (!event.savedOnly && isSaved) continue;
       listWords.add(w);
@@ -403,6 +390,8 @@ class WordsBloc extends Bloc<WordsEvent, WordsState> {
   ) async {
     try {
       await updateWord(event.word);
+      await sl<NotificationsService>().plugin.cancel(event.word.id.hashCode);
+
       final newWords = state.words.map((w) {
         return w.id == event.word.id ? event.word : w;
       }).toList();
@@ -423,14 +412,13 @@ class WordsBloc extends Bloc<WordsEvent, WordsState> {
   ) async {
     try {
       await deleteWord(event.wordId);
+      await sl<NotificationsService>().plugin.cancel(event.wordId.hashCode);
       final newWords = state.words.where((w) => w.id != event.wordId).toList();
       _originalWords = _originalWords
           .where((w) => w.id != event.wordId)
           .toList();
 
-      // Also ensure savedIds doesn't keep a deleted id.
-      final nextSaved = state.savedIds.toSet()..remove(event.wordId);
-      emit(state.copyWith(words: newWords, savedIds: nextSaved));
+      emit(state.copyWith(words: newWords));
     } catch (e) {
       // Error handling TODO
     }

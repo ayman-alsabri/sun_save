@@ -6,15 +6,14 @@ plugins {
 }
 
 android {
-    namespace = "com.example.sun_save"
+    namespace = "com.example.sun_save2"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
-        // FIX: Enable desugaring for backward compatibility
-        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
+        isCoreLibraryDesugaringEnabled = true
     }
 
     kotlinOptions {
@@ -22,14 +21,11 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.example.sun_save"
+        applicationId = "com.example.sun_save2"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
-        
-        // FIX: Enabled MultiDex to prevent build crashes
-        multiDexEnabled = true
     }
 
     buildTypes {

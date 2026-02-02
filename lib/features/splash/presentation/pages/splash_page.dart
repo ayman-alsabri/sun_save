@@ -26,11 +26,11 @@ class _SplashPageState extends State<SplashPage> {
         if (state.status == AuthStatus.authenticated) {
           Navigator.of(
             context,
-          ).pushNamedAndRemoveUntil(AppRoutes.home, (_) => false);
+          ).pushNamedAndRemoveUntil(AppRoutes.home, (route) => route.isFirst);
         } else if (state.status == AuthStatus.unauthenticated) {
           Navigator.of(
             context,
-          ).pushNamedAndRemoveUntil(AppRoutes.login, (_) => false);
+          ).pushNamedAndRemoveUntil(AppRoutes.login, (route) => route.isFirst);
         }
       },
       child: Scaffold(

@@ -51,6 +51,22 @@ class WordsDriftDao {
     );
   }
 
+  Future<Set<String>> getSavedIds() async {
+    final rows = await (db.select(
+      db.wordsTable,
+    )..where((t) => t.isSaved.equals(true))).get();
+    return rows.map((r) => r.id).toSet();
+  }
+
+  Future<void> setSaved({required String wordId, required bool saved}) async {
+    await (db.update(db.wordsTable)..where((t) => t.id.equals(wordId))).write(
+      WordsTableCompanion(
+        isSaved: Value(saved),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+  }
+
   Future<void> upsert(WordDto dto) async {
     await db
         .into(db.wordsTable)

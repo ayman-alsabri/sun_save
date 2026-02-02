@@ -1,7 +1,30 @@
 {
     "@@locale": "en",
     "appTitle": "Sun Save",
-    "wordsTitle": "Words",
+    "greetingMorning": "Good morning, {username}",
+    "@greetingMorning": {
+        "placeholders": {
+            "username": {
+                "type": "String"
+            }
+        }
+    },
+    "greetingAfternoon": "Good afternoon, {username}",
+    "@greetingAfternoon": {
+        "placeholders": {
+            "username": {
+                "type": "String"
+            }
+        }
+    },
+    "greetingFriday": "Blessed Friday, {username}",
+    "@greetingFriday": {
+        "placeholders": {
+            "username": {
+                "type": "String"
+            }
+        }
+    },
     "unsavedTab": "Unsaved",
     "savedTab": "Saved",
     "settingsTitle": "Settings",
@@ -111,5 +134,26 @@
     "autoTranslateError": "Translation failed",
     "autoTranslateNoSuggestions": "No suggestions",
     "notificationsChannelName": "Daily words",
-    "notificationsChannelDescription": "Daily word practice reminders"
+    "notificationsChannelDescription": "Daily word practice reminders",
+    "drawerProfile": "Profile",
+    "drawerSettings": "Settings",
+    "notificationScheduleApplied": "Notification schedule applied for {count} words",
+    "@notificationScheduleApplied": {
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "drawerAbout": "About Sun Save",
+    "drawerLogout": "Log out",
+    "loginGreeting": "Welcome! What’s your name?",
+    "loginSubtitle": "Tell us your name so we can personalize your experience.",
+    "loginNameRequired": "Please enter your name to continue",
+    "continueText": "Continue",
+    "aboutDescription": "Sun Save is made for anyone who wants to save new words and review them later. My goal is to help you build your vocabulary—one word at a time.",
+    "tipsTitle": "Helpful tips",
+    "tipHideShowGlobal": "• Use the menu to show or hide English or Arabic across the app.",
+    "tipHideShowPerWord": "• Use the actions on each word to show/hide it individually.",
+    "tipSpeakLists": "• Use Speak to listen to your saved or unsaved words for quick practice."
 }

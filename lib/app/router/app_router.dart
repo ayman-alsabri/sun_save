@@ -3,7 +3,6 @@ import 'package:sun_save/l10n/app_localizations.dart';
 
 import '../../features/about/presentation/pages/about_page.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
-import '../../features/auth/presentation/pages/register_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/settings/presentation/pages/settings_page.dart';
 import '../../features/splash/presentation/pages/splash_page.dart';
@@ -24,8 +23,6 @@ class AppRouter {
         return MaterialPageRoute(builder: (_) => const SplashPage());
       case AppRoutes.login:
         return MaterialPageRoute(builder: (_) => const LoginPage());
-      case AppRoutes.register:
-        return MaterialPageRoute(builder: (_) => const RegisterPage());
       case AppRoutes.home:
         return MaterialPageRoute(builder: (_) => const HomePage());
       case AppRoutes.settings:

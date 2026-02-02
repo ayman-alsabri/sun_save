@@ -4,9 +4,10 @@
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
+    <uses-permission android:name="android.permission.INTERNET"/>
 
     <application
-        android:label="sun_save"
+        android:label="Sun Save"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

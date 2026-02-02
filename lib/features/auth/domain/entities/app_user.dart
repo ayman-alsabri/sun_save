@@ -1,10 +1,10 @@
 import 'package:equatable/equatable.dart';
 
 class AppUser extends Equatable {
-  final String email;
+  final String name;
 
-  const AppUser({required this.email});
+  const AppUser({required this.name});
 
   @override
-  List<Object?> get props => [email];
+  List<Object?> get props => [name];
 }

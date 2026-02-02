@@ -12,7 +12,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appTitle => 'Sun Save';
 
   @override
-  String get wordsTitle => 'Words';
+  String greetingMorning(String username) {
+    return 'Good morning, $username';
+  }
+
+  @override
+  String greetingAfternoon(String username) {
+    return 'Good afternoon, $username';
+  }
+
+  @override
+  String greetingFriday(String username) {
+    return 'Blessed Friday, $username';
+  }
 
   @override
   String get unsavedTab => 'Unsaved';
@@ -268,4 +280,53 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get notificationsChannelDescription => 'Daily word practice reminders';
+
+  @override
+  String get drawerProfile => 'Profile';
+
+  @override
+  String get drawerSettings => 'Settings';
+
+  @override
+  String notificationScheduleApplied(int count) {
+    return 'Notification schedule applied for $count words';
+  }
+
+  @override
+  String get drawerAbout => 'About Sun Save';
+
+  @override
+  String get drawerLogout => 'Log out';
+
+  @override
+  String get loginGreeting => 'Welcome! What’s your name?';
+
+  @override
+  String get loginSubtitle =>
+      'Tell us your name so we can personalize your experience.';
+
+  @override
+  String get loginNameRequired => 'Please enter your name to continue';
+
+  @override
+  String get continueText => 'Continue';
+
+  @override
+  String get aboutDescription =>
+      'Sun Save is made for anyone who wants to save new words and review them later. My goal is to help you build your vocabulary—one word at a time.';
+
+  @override
+  String get tipsTitle => 'Helpful tips';
+
+  @override
+  String get tipHideShowGlobal =>
+      '• Use the menu to show or hide English or Arabic across the app.';
+
+  @override
+  String get tipHideShowPerWord =>
+      '• Use the actions on each word to show/hide it individually.';
+
+  @override
+  String get tipSpeakLists =>
+      '• Use Speak to listen to your saved or unsaved words for quick practice.';
 }

@@ -5,7 +5,7 @@ class Login {
   final AuthRepository repository;
   const Login(this.repository);
 
-  Future<AppUser> call({required String email, required String password}) {
-    return repository.login(email: email, password: password);
+  Future<AppUser> call({required String name}) {
+    return repository.login(name: name);
   }
 }

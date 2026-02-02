@@ -12,7 +12,19 @@ class AppLocalizationsAr extends AppLocalizations {
   String get appTitle => 'سن سيف';
 
   @override
-  String get wordsTitle => 'الكلمات';
+  String greetingMorning(String username) {
+    return 'صباحك جميل، $username';
+  }
+
+  @override
+  String greetingAfternoon(String username) {
+    return 'مساءك سعيد، $username';
+  }
+
+  @override
+  String greetingFriday(String username) {
+    return 'جمعتك مباركة، $username';
+  }
 
   @override
   String get unsavedTab => 'غير محفوظة';
@@ -269,4 +281,52 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get notificationsChannelDescription =>
       'تذكيرات للتدرب على الكلمات يوميًا';
+
+  @override
+  String get drawerProfile => 'الملف الشخصي';
+
+  @override
+  String get drawerSettings => 'الإعدادات';
+
+  @override
+  String notificationScheduleApplied(int count) {
+    return 'تم تطبيق جدول الإشعارات على $count كلمات';
+  }
+
+  @override
+  String get drawerAbout => 'حول سن سيف';
+
+  @override
+  String get drawerLogout => 'تسجيل الخروج';
+
+  @override
+  String get loginGreeting => 'مرحبًا! ما اسمك؟';
+
+  @override
+  String get loginSubtitle => 'أخبرنا باسمك لنخصّص تجربتك داخل التطبيق.';
+
+  @override
+  String get loginNameRequired => 'يرجى إدخال اسمك للمتابعة';
+
+  @override
+  String get continueText => 'متابعة';
+
+  @override
+  String get aboutDescription =>
+      'سن سيف مخصّص لكل من يريد حفظ كلمات جديدة ومراجعتها لاحقًا. هدفي هو مساعدتك على بناء مفرداتك—كلمة واحدة في كل مرة.';
+
+  @override
+  String get tipsTitle => 'نصائح مفيدة';
+
+  @override
+  String get tipHideShowGlobal =>
+      '• استخدم القائمة لإظهار أو إخفاء الإنجليزية أو العربية في التطبيق بالكامل.';
+
+  @override
+  String get tipHideShowPerWord =>
+      '• استخدم الخيارات على كل كلمة لإظهارها أو إخفائها بشكل فردي.';
+
+  @override
+  String get tipSpeakLists =>
+      '• استخدم ميزة النطق للاستماع إلى كلماتك المحفوظة أو غير المحفوظة لمراجعة سريعة.';
 }

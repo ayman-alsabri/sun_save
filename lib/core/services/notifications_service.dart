@@ -1,54 +1,78 @@
 import 'dart:math';
 
+import 'package:drift/drift.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_timezone/flutter_timezone.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sun_save/core/services/settings_local_data_source.dart';
 import 'package:timezone/data/latest.dart' as tzdata;
 import 'package:timezone/timezone.dart' as tz;
+import 'package:workmanager/workmanager.dart';
 
-import '../../features/words/domain/entities/word.dart';
-import '../../l10n/app_localizations.dart';
+import '../db/app_database.dart';
 
-class NotificationsService {
-  static const String channelId = 'daily_words';
-  static const int _baseId = 2000;
-  static const int _maxScheduled = 200; // safety cap
-
-  final FlutterLocalNotificationsPlugin _plugin;
-
-  NotificationsService(this._plugin);
-
-  Future<void> init() async {
-    tzdata.initializeTimeZones();
-
-    // Ensure tz.local is initialized; without a native timezone plugin we fall
-    // back to UTC to avoid crashes.
-    try {
-      tz.setLocalLocation(tz.local);
-    } catch (_) {
-      tz.setLocalLocation(tz.getLocation('UTC'));
-    }
-
-    const android = AndroidInitializationSettings('@mipmap/ic_launcher');
-    const initSettings = InitializationSettings(android: android);
-    await _plugin.initialize(initSettings);
-
-    // Create channel on Android.
-    final androidPlugin = _plugin
-        .resolvePlatformSpecificImplementation<
-          AndroidFlutterLocalNotificationsPlugin
-        >();
-    await androidPlugin?.createNotificationChannel(
-      const AndroidNotificationChannel(
-        channelId,
-        // These will be overridden by localized channel creation below when
-        // scheduleDailyWords is called.
-        'daily_words',
-        description: 'daily_words',
-        importance: Importance.high,
+@pragma('vm:entry-point')
+Future<NotificationsService> launchWorker([
+  bool reset = false,
+  NotificationsService? service,
+]) async {
+  final notificationsService = service ?? NotificationsService.background();
+  if (reset) {
+    await Workmanager().cancelAll();
+    notificationsService.plugin.cancelAll();
+    await SharedPreferences.getInstance().then(
+      (prefs) => prefs.setInt(
+        NotificationsService.lastNotificationTimeKey,
+        DateTime.now().millisecondsSinceEpoch,
       ),
     );
   }
+  await Workmanager().registerPeriodicTask(
+    NotificationsService.channelId,
+    NotificationsService.taskName,
+    frequency: Duration(minutes: 15),
+    initialDelay: Duration.zero,
+  );
+  return notificationsService;
+}
 
-  Future<void> _ensureAndroidChannel(AppLocalizations l10n) async {
+class NotificationsService {
+  static const String channelId = 'daily_words';
+  static const String taskName = 'daily_word_notification_task';
+  static const String counterKey = 'notification_word_counter';
+  static const String lastNotificationTimeKey = 'last_notification_time';
+
+  final FlutterLocalNotificationsPlugin _plugin;
+  FlutterLocalNotificationsPlugin get plugin => _plugin;
+
+  NotificationsService(this._plugin);
+
+  NotificationsService.background()
+    : _plugin = FlutterLocalNotificationsPlugin();
+
+  Future<void> init() async {
+    tzdata.initializeTimeZones();
+    final String timeZoneName =
+        (await FlutterTimezone.getLocalTimezone()).identifier;
+    tz.setLocalLocation(tz.getLocation(timeZoneName));
+
+    const android = AndroidInitializationSettings('noti_icon');
+    const initSettings = InitializationSettings(android: android);
+    await _plugin.initialize(initSettings);
+    await _ensureAndroidChannel();
+  }
+
+  Future<bool> requestPermissions() async {
+    final android = _plugin
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >();
+    if (android == null) return true;
+    await android.requestExactAlarmsPermission() ?? true;
+    return (await android.requestNotificationsPermission()) ?? true;
+  }
+
+  Future<void> _ensureAndroidChannel() async {
     final androidPlugin = _plugin
         .resolvePlatformSpecificImplementation<
           AndroidFlutterLocalNotificationsPlugin
@@ -58,122 +82,205 @@ class NotificationsService {
     await androidPlugin.createNotificationChannel(
       AndroidNotificationChannel(
         channelId,
-        l10n.notificationsChannelName,
-        description: l10n.notificationsChannelDescription,
+        'Daily Words',
+        description: 'Tracked vocabulary reminders',
         importance: Importance.high,
       ),
     );
   }
 
-  Future<bool> requestPermissions() async {
-    final android = _plugin
-        .resolvePlatformSpecificImplementation<
-          AndroidFlutterLocalNotificationsPlugin
-        >();
-    if (android == null) return true;
-    return (await android.requestNotificationsPermission()) ?? true;
+  bool _isInWindow(DateTime time, int startMinutes, int endMinutes) {
+    final nowMinutes = time.hour * 60 + time.minute;
+
+    if (startMinutes <= endMinutes) {
+      return nowMinutes >= startMinutes && nowMinutes <= endMinutes;
+    } else {
+      return nowMinutes >= startMinutes || nowMinutes <= endMinutes;
+    }
   }
 
-  Future<void> cancelAllScheduled() => _plugin.cancelAll();
+  String get _randomNotificationDescription {
+    return [
+      // English Support & Motivation
+      "A new word to brighten your journey.",
+      "Small steps lead to great distances. Keep going.",
+      "Your future self will thank you for today's effort.",
+      "Language is the key to a thousand worlds.",
+      "Consistency is the secret of mastery.",
+      "Every word you learn is a new window to the world.",
+      "You are doing better than you think. Stay focused.",
+      "Unlock your potential, one word at a time.",
+      "Wisdom begins with the hunger for knowledge.",
+      "Don't stop until you're proud.",
+      "The limit of your language is the limit of your world.",
+      "Success is the sum of small efforts repeated daily.",
+      "Make learning your favorite habit.",
+      "Growth happens outside of your comfort zone.",
+      "Knowledge is the only treasure that grows when shared.",
 
-  /// Schedules [count] notifications per day, spaced within the time window.
-  ///
-  /// The notification body will include English + Arabic for the chosen unsaved
-  /// words.
-  ///
-  /// Minutes are minutes-from-midnight in local time.
-  /// If end <= start, it is treated as spanning midnight (end is next day).
-  Future<void> scheduleDailyWords({
-    required int count,
-    required int startMinutes,
-    required int endMinutes,
-    required AppLocalizations l10n,
-    required List<Word> unsavedWords,
-  }) async {
-    // Ensure Android channel exists with localized name/description.
-    await _ensureAndroidChannel(l10n);
+      // Arabic Support & Motivation (تحفيزية)
+      "كلمة جديدة.. خطوة أخرى نحو القمة.",
+      "الاستمرارية هي سر النجاح، واصل تقدمك.",
+      "كل كلمة تتعلمها اليوم هي استثمار لمستقبلك.",
+      "لغتك هي مرآة فكرك، اجعلها تلمع.",
+      "القليل الدائم خير من الكثير المنقطع.",
+      "أنت تبني مستقبلك بكلماتك، لا تتوقف.",
+      "تذكر أن رحلة الألف ميل تبدأ بكلمة واحدة.",
+      "العلم نور، وأنت اليوم تزداد ضياءً.",
+      "اجعل من التعلم عادة، ومن النجاح غاية.",
+      "كلما زادت كلماتك، اتسعت آفاق عالمك.",
+      "أنت تملك القدرة على التميز، استمر في المحاولة.",
+      "لا شيء مستحيل مع الإصرار والعزيمة.",
+      "اليوم كلمة، وغداً فصاحة وبيان.",
+      "تعلم لغة جديدة يعني امتلاك روح ثانية.",
+      "كن فخوراً بما وصلت إليه، وكن طموحاً للأفضل.",
+    ][Random().nextInt(30)];
+  }
 
-    await cancelAllScheduled();
-
-    if (count <= 0) return;
-    if (unsavedWords.isEmpty) return;
-
-    final target = min(count, unsavedWords.length);
-    if (target <= 0) return;
-
-    final now = tz.TZDateTime.now(tz.local);
-
-    tz.TZDateTime start = _dateTimeFromMinutes(now, startMinutes);
-    tz.TZDateTime end = _dateTimeFromMinutes(now, endMinutes);
-    if (!end.isAfter(start)) {
-      end = end.add(const Duration(days: 1));
-    }
-
-    // If the entire window is in the past, move to next day.
-    if (!end.isAfter(now)) {
-      start = start.add(const Duration(days: 1));
-      end = end.add(const Duration(days: 1));
-    }
-
-    // Ensure start isn't in the past.
-    if (!start.isAfter(now)) {
-      start = now.add(const Duration(minutes: 1));
-    }
-    if (!end.isAfter(start)) return;
-
-    final windowMinutes = end.difference(start).inMinutes;
-    if (windowMinutes <= 0) return;
-
-    final spacing = max(1, (windowMinutes / target).floor());
-
-    final androidDetails = AndroidNotificationDetails(
+  NotificationDetails get _notificationDetails {
+    const androidDetails = AndroidNotificationDetails(
       channelId,
-      l10n.wordsTitle,
-      channelDescription: l10n.wordsTitle,
+      'Daily Words',
+      icon: 'noti_icon',
+      channelDescription: 'Daily vocabulary reminders',
+      sound: RawResourceAndroidNotificationSound('noti_sound'),
+      playSound: true,
       importance: Importance.high,
       priority: Priority.high,
     );
-    final details = NotificationDetails(android: androidDetails);
-
-    // Pick which words to show today.
-    final chosen = List<Word>.from(unsavedWords);
-    chosen.shuffle();
-
-    for (var i = 0; i < target && i < _maxScheduled; i++) {
-      final id = _baseId + i;
-      var scheduledAt = start.add(Duration(minutes: i * spacing));
-      if (!end.isAfter(scheduledAt)) {
-        scheduledAt = end.subtract(const Duration(minutes: 1));
-      }
-
-      final w = chosen[i];
-      final body = '${w.en} — ${w.ar}';
-
-      await _plugin.zonedSchedule(
-        id,
-        l10n.wordsTitle,
-        body,
-        scheduledAt,
-        details,
-        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-        matchDateTimeComponents: DateTimeComponents.time,
-        payload: w.id,
-      );
-    }
+    return const NotificationDetails(android: androidDetails);
   }
 
-  tz.TZDateTime _dateTimeFromMinutes(
-    tz.TZDateTime day,
-    int minutesFromMidnight,
-  ) {
-    final m = minutesFromMidnight.clamp(0, 1439);
-    return tz.TZDateTime(
-      tz.local,
-      day.year,
-      day.month,
-      day.day,
-      m ~/ 60,
-      m % 60,
-    );
+  Future<List<WordsTableData>> _selectUnsavedWords(
+    AppDatabase db, {
+    required int limit,
+    required int offset,
+  }) {
+    return (db.select(db.wordsTable)
+          ..where((t) => t.isSaved.equals(false))
+          ..orderBy([(t) => OrderingTerm.asc(t.createdAt)])
+          ..limit(limit, offset: offset))
+        .get();
+  }
+
+  Future<bool> handleBackground(
+    String task,
+    Map<String, dynamic>? inputData,
+  ) async {
+    if (task != taskName) return true;
+
+    await init();
+
+    final prefs = await SharedPreferences.getInstance();
+    final settings = await SettingsLocalDataSourceImpl(prefs).read();
+    final wordsPerDay = settings.wordsPerDay;
+    final startMinutes = settings.notifyStartMinutes;
+    final endMinutes = settings.notifyEndMinutes;
+
+    if (wordsPerDay <= 0) return true;
+
+    final now = DateTime.now();
+    if (!_isInWindow(now, startMinutes, endMinutes)) return true;
+
+    int totalWindowMinutes = 0;
+    if (startMinutes <= endMinutes) {
+      totalWindowMinutes = endMinutes - startMinutes;
+    } else {
+      totalWindowMinutes = (24 * 60 - startMinutes) + endMinutes;
+    }
+    if (totalWindowMinutes <= 0) totalWindowMinutes = 1;
+
+    try {
+      // 15 is for the duration of workmanager
+      final wordsLimit = wordsPerDay * 15 ~/ totalWindowMinutes;
+      final db = AppDatabase();
+      int counter = prefs.getInt(counterKey) ?? 0;
+      final allWordsCount =
+          await (db.selectOnly(db.wordsTable)
+                ..addColumns([db.wordsTable.id.count()])
+                ..where(db.wordsTable.isSaved.equals(false)))
+              .map((row) => row.read(db.wordsTable.id.count()))
+              .getSingle() ??
+          0;
+      late final List<WordsTableData> unsavedWords;
+      if (counter == allWordsCount) {
+        unsavedWords = await _selectUnsavedWords(
+          db,
+          limit: wordsLimit,
+          offset: 0,
+        );
+      } else if (counter + wordsLimit > allWordsCount) {
+        unsavedWords = [
+          ...await _selectUnsavedWords(
+            db,
+            limit: allWordsCount - counter,
+            offset: counter,
+          ),
+          ...await _selectUnsavedWords(
+            db,
+            limit: wordsLimit - (allWordsCount - counter),
+            offset: 0,
+          ),
+        ];
+      } else {
+        unsavedWords = await _selectUnsavedWords(
+          db,
+          limit: wordsLimit,
+          offset: counter,
+        );
+      }
+
+      if (unsavedWords.isEmpty) {
+        await db.close();
+        return true;
+      }
+
+      final wordDurationMinutes = wordsPerDay / totalWindowMinutes;
+      final wordDuration = Duration(
+        minutes: wordDurationMinutes.floor(),
+        seconds: (wordDurationMinutes % 1 * 60).round(),
+      );
+      final lastNotification = prefs.getInt(lastNotificationTimeKey);
+      DateTime lastNotificationTime = lastNotification != null
+          ? DateTime.fromMillisecondsSinceEpoch(lastNotification)
+          : DateTime.now();
+
+      if (now.isAfter(lastNotificationTime.add(wordDuration))) {
+        lastNotificationTime = now;
+      }
+
+      for (int i = 0; i < wordsLimit; i++) {
+        final word = unsavedWords[i % unsavedWords.length];
+        final scheduledTime = lastNotificationTime.add(wordDuration);
+        if (!_isInWindow(scheduledTime, startMinutes, endMinutes)) {
+          break;
+        }
+        lastNotificationTime = scheduledTime;
+        counter = (counter + 1) % allWordsCount;
+
+        await _plugin.zonedSchedule(
+          word.id.hashCode,
+          '${word.en} — ${word.ar}',
+          _randomNotificationDescription,
+          tz.TZDateTime.from(scheduledTime, tz.local),
+          androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+          _notificationDetails,
+          payload: '${word.en} - ${word.ar}',
+          matchDateTimeComponents: DateTimeComponents.dateAndTime,
+        );
+      }
+
+      await prefs.setInt(counterKey, counter);
+      await prefs.setInt(
+        lastNotificationTimeKey,
+        lastNotificationTime.millisecondsSinceEpoch,
+      );
+
+      await db.close();
+    } catch (e) {
+      print("Error in background task: $e");
+    }
+
+    return true;
   }
 }

@@ -11,10 +11,6 @@ class WordsRequested extends WordsEvent {
   const WordsRequested();
 }
 
-class WordsSavedIdsRequested extends WordsEvent {
-  const WordsSavedIdsRequested();
-}
-
 class WordSavedToggled extends WordsEvent {
   final String wordId;
   final bool saved;

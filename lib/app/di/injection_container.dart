@@ -13,11 +13,9 @@ import '../../features/auth/domain/repositories/auth_repository.dart';
 import '../../features/auth/domain/usecases/get_current_user.dart';
 import '../../features/auth/domain/usecases/login.dart';
 import '../../features/auth/domain/usecases/logout.dart';
-import '../../features/auth/domain/usecases/register.dart';
 import '../../features/auth/presentation/bloc/auth_bloc.dart';
 import '../../features/settings/presentation/bloc/settings_cubit.dart';
 import '../../features/words/data/datasources/words_drift_data_source.dart';
-import '../../features/words/data/datasources/words_local_data_source.dart';
 import '../../features/words/data/repositories/words_repository_impl.dart';
 import '../../features/words/domain/repositories/words_repository.dart';
 import '../../features/words/domain/usecases/add_word.dart';
@@ -52,23 +50,21 @@ Future<void> initDependencies() async {
   sl.registerLazySingleton<AuthLocalDataSource>(
     () => AuthLocalDataSourceImpl(sl()),
   );
-  sl.registerLazySingleton<WordsLocalDataSource>(
-    () => WordsLocalDataSourceImpl(sl()),
-  );
+  // WordsLocalDataSource is no longer used for saved words (saved is stored in DB)
+  // sl.registerLazySingleton<WordsLocalDataSource>(
+  //   () => WordsLocalDataSourceImpl(sl()),
+  // );
   sl.registerLazySingleton<WordsDriftDataSource>(
     () => WordsDriftDataSourceImpl(sl()),
   );
 
   // Repositories
   sl.registerLazySingleton<AuthRepository>(() => AuthRepositoryImpl(sl()));
-  sl.registerLazySingleton<WordsRepository>(
-    () => WordsRepositoryImpl(sl(), sl()),
-  );
+  sl.registerLazySingleton<WordsRepository>(() => WordsRepositoryImpl(sl()));
 
   // Auth use cases
   sl.registerLazySingleton(() => GetCurrentUser(sl()));
   sl.registerLazySingleton(() => Login(sl()));
-  sl.registerLazySingleton(() => Register(sl()));
   sl.registerLazySingleton(() => Logout(sl()));
 
   // Words use cases
@@ -81,17 +77,11 @@ Future<void> initDependencies() async {
 
   // Blocs (factories)
   sl.registerFactory(
-    () => AuthBloc(
-      getCurrentUser: sl(),
-      login: sl(),
-      register: sl(),
-      logout: sl(),
-    ),
+    () => AuthBloc(getCurrentUser: sl(), login: sl(), logout: sl()),
   );
   sl.registerFactory(
     () => WordsBloc(
       getWords: sl(),
-      getSavedWordIds: sl(),
       setWordSaved: sl(),
       addWord: sl(),
       updateWord: sl(),

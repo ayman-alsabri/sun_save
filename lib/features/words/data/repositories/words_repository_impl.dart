@@ -1,13 +1,11 @@
 import '../../domain/entities/word.dart';
 import '../../domain/repositories/words_repository.dart';
 import '../datasources/words_drift_data_source.dart';
-import '../datasources/words_local_data_source.dart';
 
 class WordsRepositoryImpl implements WordsRepository {
-  final WordsLocalDataSource local;
   final WordsDriftDataSource drift;
 
-  WordsRepositoryImpl(this.local, this.drift);
+  WordsRepositoryImpl(this.drift);
 
   @override
   Future<WordsPage> getWordsPage({
@@ -20,21 +18,12 @@ class WordsRepositoryImpl implements WordsRepository {
 
   @override
   Future<Set<String>> getSavedWordIds() async {
-    return local.getSavedWords().toSet();
+    return drift.getSavedWordIds();
   }
 
   @override
-  Future<void> setWordSaved({
-    required String wordId,
-    required bool saved,
-  }) async {
-    final current = local.getSavedWords().toSet();
-    if (saved) {
-      current.add(wordId);
-    } else {
-      current.remove(wordId);
-    }
-    await local.saveSavedWords(current.toList());
+  Future<void> setWordSaved({required String wordId, required bool saved}) {
+    return drift.setWordSaved(wordId: wordId, saved: saved);
   }
 
   @override

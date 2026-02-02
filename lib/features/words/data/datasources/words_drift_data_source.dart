@@ -15,6 +15,10 @@ abstract class WordsDriftDataSource {
 
   Future<WordsPageResult> fetchPage({required int limit, required int offset});
 
+  Future<Set<String>> getSavedWordIds();
+
+  Future<void> setWordSaved({required String wordId, required bool saved});
+
   Future<void> addWord(Word word);
 
   Future<void> updateWord(Word word);
@@ -52,13 +56,27 @@ class WordsDriftDataSourceImpl implements WordsDriftDataSource {
   }
 
   @override
+  Future<Set<String>> getSavedWordIds() {
+    return dao.getSavedIds();
+  }
+
+  @override
+  Future<void> setWordSaved({required String wordId, required bool saved}) {
+    return dao.setSaved(wordId: wordId, saved: saved);
+  }
+
+  @override
   Future<void> addWord(Word word) {
-    return dao.upsert(WordDto(id: word.id, en: word.en, ar: word.ar));
+    return dao.upsert(
+      WordDto(id: word.id, en: word.en, ar: word.ar, isSaved: word.isSaved),
+    );
   }
 
   @override
   Future<void> updateWord(Word word) {
-    return dao.updateById(WordDto(id: word.id, en: word.en, ar: word.ar));
+    return dao.updateById(
+      WordDto(id: word.id, en: word.en, ar: word.ar, isSaved: word.isSaved),
+    );
   }
 
   @override

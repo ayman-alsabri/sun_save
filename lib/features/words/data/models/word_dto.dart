@@ -7,14 +7,20 @@ class WordDto {
   final String id;
   final String en;
   final String ar;
+  final bool isSaved;
 
-  const WordDto({required this.id, required this.en, required this.ar});
+  const WordDto({
+    required this.id,
+    required this.en,
+    required this.ar,
+    this.isSaved = false,
+  });
 
   factory WordDto.fromRow(WordsTableData row) {
-    return WordDto(id: row.id, en: row.en, ar: row.ar);
+    return WordDto(id: row.id, en: row.en, ar: row.ar, isSaved: row.isSaved);
   }
 
-  Word toDomain() => Word(id: id, en: en, ar: ar);
+  Word toDomain() => Word(id: id, en: en, ar: ar, isSaved: isSaved);
 
   WordsTableCompanion toInsertCompanion() {
     final now = DateTime.now();
@@ -22,6 +28,7 @@ class WordDto {
       id: id,
       en: en,
       ar: ar,
+      isSaved: Value(isSaved),
       createdAt: now,
       updatedAt: now,
     );
@@ -32,6 +39,7 @@ class WordDto {
     return WordsTableCompanion(
       en: Value(en),
       ar: Value(ar),
+      isSaved: Value(isSaved),
       updatedAt: Value(now),
     );
   }

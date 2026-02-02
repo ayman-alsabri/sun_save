@@ -15,6 +15,9 @@ class WordsTable extends Table {
 
   TextColumn get ar => text()();
 
+  // Persist saved status in DB (replaces SharedPreferences saved_words list)
+  BoolColumn get isSaved => boolean().withDefault(const Constant(false))();
+
   DateTimeColumn get createdAt => dateTime()();
 
   DateTimeColumn get updatedAt => dateTime()();
@@ -28,7 +31,19 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
+
+  @override
+  MigrationStrategy get migration => MigrationStrategy(
+    onUpgrade: (m, from, to) async {
+      if (from < 2) {
+        await m.addColumn(
+          wordsTable,
+          wordsTable.isSaved as GeneratedColumn<Object>,
+        );
+      }
+    },
+  );
 }
 
 LazyDatabase _openConnection() {

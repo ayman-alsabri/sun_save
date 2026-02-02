@@ -6,13 +6,11 @@ import 'words_list_item.dart';
 
 class WordsListView extends StatelessWidget {
   final List<Word> words;
-  final Set<String> savedIds;
   final bool isSavedTab;
 
   const WordsListView({
     super.key,
     required this.words,
-    required this.savedIds,
     required this.isSavedTab,
   });
 
@@ -31,8 +29,7 @@ class WordsListView extends StatelessWidget {
       separatorBuilder: (_, __) => const SizedBox(height: 8),
       itemBuilder: (context, index) {
         final word = words[index];
-        final isSaved = savedIds.contains(word.id);
-        return WordsListItem(word: word, isSaved: isSaved);
+        return WordsListItem(word: word, isSaved: word.isSaved);
       },
     );
   }

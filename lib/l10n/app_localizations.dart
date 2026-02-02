@@ -104,11 +104,23 @@ abstract class AppLocalizations {
   /// **'Sun Save'**
   String get appTitle;
 
-  /// No description provided for @wordsTitle.
+  /// No description provided for @greetingMorning.
   ///
   /// In en, this message translates to:
-  /// **'Words'**
-  String get wordsTitle;
+  /// **'Good morning, {username}'**
+  String greetingMorning(String username);
+
+  /// No description provided for @greetingAfternoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Good afternoon, {username}'**
+  String greetingAfternoon(String username);
+
+  /// No description provided for @greetingFriday.
+  ///
+  /// In en, this message translates to:
+  /// **'Blessed Friday, {username}'**
+  String greetingFriday(String username);
 
   /// No description provided for @unsavedTab.
   ///
@@ -601,6 +613,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Daily word practice reminders'**
   String get notificationsChannelDescription;
+
+  /// No description provided for @drawerProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile'**
+  String get drawerProfile;
+
+  /// No description provided for @drawerSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get drawerSettings;
+
+  /// No description provided for @notificationScheduleApplied.
+  ///
+  /// In en, this message translates to:
+  /// **'Notification schedule applied for {count} words'**
+  String notificationScheduleApplied(int count);
+
+  /// No description provided for @drawerAbout.
+  ///
+  /// In en, this message translates to:
+  /// **'About Sun Save'**
+  String get drawerAbout;
+
+  /// No description provided for @drawerLogout.
+  ///
+  /// In en, this message translates to:
+  /// **'Log out'**
+  String get drawerLogout;
+
+  /// No description provided for @loginGreeting.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome! What’s your name?'**
+  String get loginGreeting;
+
+  /// No description provided for @loginSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tell us your name so we can personalize your experience.'**
+  String get loginSubtitle;
+
+  /// No description provided for @loginNameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter your name to continue'**
+  String get loginNameRequired;
+
+  /// No description provided for @continueText.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get continueText;
+
+  /// No description provided for @aboutDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Sun Save is made for anyone who wants to save new words and review them later. My goal is to help you build your vocabulary—one word at a time.'**
+  String get aboutDescription;
+
+  /// No description provided for @tipsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Helpful tips'**
+  String get tipsTitle;
+
+  /// No description provided for @tipHideShowGlobal.
+  ///
+  /// In en, this message translates to:
+  /// **'• Use the menu to show or hide English or Arabic across the app.'**
+  String get tipHideShowGlobal;
+
+  /// No description provided for @tipHideShowPerWord.
+  ///
+  /// In en, this message translates to:
+  /// **'• Use the actions on each word to show/hide it individually.'**
+  String get tipHideShowPerWord;
+
+  /// No description provided for @tipSpeakLists.
+  ///
+  /// In en, this message translates to:
+  /// **'• Use Speak to listen to your saved or unsaved words for quick practice.'**
+  String get tipSpeakLists;
 }
 
 class _AppLocalizationsDelegate

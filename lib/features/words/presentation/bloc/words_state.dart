@@ -29,7 +29,6 @@ class WordsMessage extends Equatable {
 class WordsState extends Equatable {
   final WordsStatus status;
   final List<Word> words;
-  final Set<String> savedIds;
   final bool showEn;
   final bool showAr;
   final Map<String, bool> showEnById;
@@ -45,7 +44,6 @@ class WordsState extends Equatable {
   const WordsState({
     required this.status,
     required this.words,
-    required this.savedIds,
     required this.showEn,
     required this.showAr,
     required this.showEnById,
@@ -63,7 +61,6 @@ class WordsState extends Equatable {
     : this(
         status: WordsStatus.initial,
         words: const [],
-        savedIds: const {},
         showEn: true,
         showAr: true,
         showEnById: const {},
@@ -79,7 +76,6 @@ class WordsState extends Equatable {
   WordsState copyWith({
     WordsStatus? status,
     List<Word>? words,
-    Set<String>? savedIds,
     bool? showEn,
     bool? showAr,
     Map<String, bool>? showEnById,
@@ -95,7 +91,6 @@ class WordsState extends Equatable {
     return WordsState(
       status: status ?? this.status,
       words: words ?? this.words,
-      savedIds: savedIds ?? this.savedIds,
       showEn: showEn ?? this.showEn,
       showAr: showAr ?? this.showAr,
       showEnById: showEnById ?? this.showEnById,
@@ -114,11 +109,10 @@ class WordsState extends Equatable {
   List<Object?> get props => [
     status,
     words,
-    savedIds,
     showEn,
     showAr,
-    showEnById,
-    showArById,
+    ...showEnById.entries,
+    ...showArById.entries,
     speakingWordId,
     isShuffled,
     speakingStatus,

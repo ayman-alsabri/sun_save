@@ -37,104 +37,113 @@ class _WordsListItemState extends State<WordsListItem> {
     final textDecoration = widget.isSaved ? TextDecoration.lineThrough : null;
     final textOpacity = widget.isSaved ? 0.5 : 1.0;
 
-    return Card(
-      margin: EdgeInsets.zero,
-      elevation: 0,
-      color: isSpeaking
-          ? speakingBg
-          : widget.isSaved
-          ? cs.surfaceContainerLow
-          : cs.surface,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(14),
-        side: BorderSide(color: cs.outlineVariant.withAlpha(90)),
-      ),
-      child: InkWell(
-        onLongPress: () => _showActions(context, widget.isSaved),
-        onTap: () => _showTest(showEn, showAr),
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _ActionIcon(
-                isSaved: widget.isSaved,
-                tooltip: l10n.speak,
-                icon: Icons.volume_up_outlined,
-                isActive: isSpeaking,
-                onPressed: () => context.read<WordsBloc>().add(
-                  SpeakWordRequested(widget.word.id),
+    return BlocListener<WordsBloc, WordsState>(
+      listener: (context, state) {
+        setState(() {});
+      },
+      listenWhen: (previous, current) =>
+          previous.showAr != current.showAr ||
+          previous.showEn != current.showEn,
+      child: Card(
+        margin: EdgeInsets.zero,
+        elevation: 0,
+        color: isSpeaking
+            ? speakingBg
+            : widget.isSaved
+            ? cs.surfaceContainerLow
+            : cs.surface,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(14),
+          side: BorderSide(color: cs.outlineVariant.withAlpha(90)),
+        ),
+        child: InkWell(
+          onLongPress: () => _showActions(context, widget.isSaved),
+          onTap: () => _showTest(showEn, showAr),
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _ActionIcon(
+                  isSaved: widget.isSaved,
+                  tooltip: l10n.speak,
+                  icon: Icons.volume_up_outlined,
+                  isActive: isSpeaking,
+                  onPressed: () => context.read<WordsBloc>().add(
+                    SpeakWordRequested(widget.word.id),
+                  ),
                 ),
-              ),
-              Expanded(
-                child: Column(
-                  spacing: 2,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      showEn ? widget.word.en : '\u2022\u2022\u2022',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: isSpeaking
-                            ? FontWeight.w700
-                            : FontWeight.w600,
-                        color: (isSpeaking ? cs.primary : cs.onSurface)
-                            .withValues(alpha: textOpacity),
-                        decoration: textDecoration,
-                      ),
-                    ),
-                    Text(
-                      showAr ? widget.word.ar : '\u2022\u2022\u2022',
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: cs.onSurfaceVariant.withValues(
-                          alpha: textOpacity,
-                        ),
-                        decoration: textDecoration,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(
-                height: 70,
-                child: FittedBox(
+                Expanded(
                   child: Column(
-                    mainAxisSize: MainAxisSize.min,
+                    spacing: 2,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _ActionIcon(
-                        isSaved: widget.isSaved,
-                        tooltip: showEn ? l10n.hideEnglish : l10n.showEnglish,
-                        icon: showEn
-                            ? Icons.visibility_off_outlined
-                            : Icons.visibility_outlined,
-                        onPressed: () => context.read<WordsBloc>().add(
-                          WordShowEnToggled(
-                            wordId: widget.word.id,
-                            show: !showEn,
-                          ),
-                        ),
+                      Text(
+                        showEn ? widget.word.en : '\u2022\u2022\u2022',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(
+                              fontWeight: isSpeaking
+                                  ? FontWeight.w700
+                                  : FontWeight.w600,
+                              color: (isSpeaking ? cs.primary : cs.onSurface)
+                                  .withValues(alpha: textOpacity),
+                              decoration: textDecoration,
+                            ),
                       ),
-                      _ActionIcon(
-                        isSaved: widget.isSaved,
-                        tooltip: showAr ? l10n.hideArabic : l10n.showArabic,
-                        icon: showAr
-                            ? Icons.visibility_off_outlined
-                            : Icons.visibility_outlined,
-                        onPressed: () => context.read<WordsBloc>().add(
-                          WordShowArToggled(
-                            wordId: widget.word.id,
-                            show: !showAr,
+                      Text(
+                        showAr ? widget.word.ar : '\u2022\u2022\u2022',
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: cs.onSurfaceVariant.withValues(
+                            alpha: textOpacity,
                           ),
+                          decoration: textDecoration,
                         ),
                       ),
                     ],
                   ),
                 ),
-              ),
-            ],
+                SizedBox(
+                  height: 70,
+                  child: FittedBox(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        _ActionIcon(
+                          isSaved: widget.isSaved,
+                          tooltip: showEn ? l10n.hideEnglish : l10n.showEnglish,
+                          icon: showEn
+                              ? Icons.visibility_off_outlined
+                              : Icons.visibility_outlined,
+                          onPressed: () => context.read<WordsBloc>().add(
+                            WordShowEnToggled(
+                              wordId: widget.word.id,
+                              show: !showEn,
+                            ),
+                          ),
+                        ),
+                        _ActionIcon(
+                          isSaved: widget.isSaved,
+                          tooltip: showAr ? l10n.hideArabic : l10n.showArabic,
+                          icon: showAr
+                              ? Icons.visibility_off_outlined
+                              : Icons.visibility_outlined,
+                          onPressed: () => context.read<WordsBloc>().add(
+                            WordShowArToggled(
+                              wordId: widget.word.id,
+                              show: !showAr,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

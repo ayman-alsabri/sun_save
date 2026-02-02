@@ -33,7 +33,7 @@ class AboutPage extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'A tiny clean-architecture demo app for saving bilingual words and practicing with text-to-speech.',
+            l10n.aboutDescription,
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.bodyMedium,
           ),
@@ -45,17 +45,15 @@ class AboutPage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Tips',
+                    l10n.tipsTitle,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w700,
                     ),
                   ),
                   const SizedBox(height: 8),
-                  const Text(
-                    '• Hide/show English or Arabic globally from the menu.',
-                  ),
-                  const Text('• Hide/show per-word from the row actions.'),
-                  const Text('• Speak saved/unsaved lists from the menu.'),
+                  Text(l10n.tipHideShowGlobal),
+                  Text(l10n.tipHideShowPerWord),
+                  Text(l10n.tipSpeakLists),
                 ],
               ),
             ),

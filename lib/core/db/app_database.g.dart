@@ -36,6 +36,21 @@ class $WordsTableTable extends WordsTable
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _isSavedMeta = const VerificationMeta(
+    'isSaved',
+  );
+  @override
+  late final GeneratedColumn<bool> isSaved = GeneratedColumn<bool>(
+    'is_saved',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_saved" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -59,7 +74,14 @@ class $WordsTableTable extends WordsTable
     requiredDuringInsert: true,
   );
   @override
-  List<GeneratedColumn> get $columns => [id, en, ar, createdAt, updatedAt];
+  List<GeneratedColumn> get $columns => [
+    id,
+    en,
+    ar,
+    isSaved,
+    createdAt,
+    updatedAt,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -86,6 +108,12 @@ class $WordsTableTable extends WordsTable
       context.handle(_arMeta, ar.isAcceptableOrUnknown(data['ar']!, _arMeta));
     } else if (isInserting) {
       context.missing(_arMeta);
+    }
+    if (data.containsKey('is_saved')) {
+      context.handle(
+        _isSavedMeta,
+        isSaved.isAcceptableOrUnknown(data['is_saved']!, _isSavedMeta),
+      );
     }
     if (data.containsKey('created_at')) {
       context.handle(
@@ -124,6 +152,10 @@ class $WordsTableTable extends WordsTable
         DriftSqlType.string,
         data['${effectivePrefix}ar'],
       )!,
+      isSaved: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_saved'],
+      )!,
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
@@ -145,12 +177,14 @@ class WordsTableData extends DataClass implements Insertable<WordsTableData> {
   final String id;
   final String en;
   final String ar;
+  final bool isSaved;
   final DateTime createdAt;
   final DateTime updatedAt;
   const WordsTableData({
     required this.id,
     required this.en,
     required this.ar,
+    required this.isSaved,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -160,6 +194,7 @@ class WordsTableData extends DataClass implements Insertable<WordsTableData> {
     map['id'] = Variable<String>(id);
     map['en'] = Variable<String>(en);
     map['ar'] = Variable<String>(ar);
+    map['is_saved'] = Variable<bool>(isSaved);
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
     return map;
@@ -170,6 +205,7 @@ class WordsTableData extends DataClass implements Insertable<WordsTableData> {
       id: Value(id),
       en: Value(en),
       ar: Value(ar),
+      isSaved: Value(isSaved),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
     );
@@ -184,6 +220,7 @@ class WordsTableData extends DataClass implements Insertable<WordsTableData> {
       id: serializer.fromJson<String>(json['id']),
       en: serializer.fromJson<String>(json['en']),
       ar: serializer.fromJson<String>(json['ar']),
+      isSaved: serializer.fromJson<bool>(json['isSaved']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
     );
@@ -195,6 +232,7 @@ class WordsTableData extends DataClass implements Insertable<WordsTableData> {
       'id': serializer.toJson<String>(id),
       'en': serializer.toJson<String>(en),
       'ar': serializer.toJson<String>(ar),
+      'isSaved': serializer.toJson<bool>(isSaved),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
     };
@@ -204,12 +242,14 @@ class WordsTableData extends DataClass implements Insertable<WordsTableData> {
     String? id,
     String? en,
     String? ar,
+    bool? isSaved,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) => WordsTableData(
     id: id ?? this.id,
     en: en ?? this.en,
     ar: ar ?? this.ar,
+    isSaved: isSaved ?? this.isSaved,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
   );
@@ -218,6 +258,7 @@ class WordsTableData extends DataClass implements Insertable<WordsTableData> {
       id: data.id.present ? data.id.value : this.id,
       en: data.en.present ? data.en.value : this.en,
       ar: data.ar.present ? data.ar.value : this.ar,
+      isSaved: data.isSaved.present ? data.isSaved.value : this.isSaved,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
     );
@@ -229,6 +270,7 @@ class WordsTableData extends DataClass implements Insertable<WordsTableData> {
           ..write('id: $id, ')
           ..write('en: $en, ')
           ..write('ar: $ar, ')
+          ..write('isSaved: $isSaved, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
@@ -236,7 +278,7 @@ class WordsTableData extends DataClass implements Insertable<WordsTableData> {
   }
 
   @override
-  int get hashCode => Object.hash(id, en, ar, createdAt, updatedAt);
+  int get hashCode => Object.hash(id, en, ar, isSaved, createdAt, updatedAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -244,6 +286,7 @@ class WordsTableData extends DataClass implements Insertable<WordsTableData> {
           other.id == this.id &&
           other.en == this.en &&
           other.ar == this.ar &&
+          other.isSaved == this.isSaved &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt);
 }
@@ -252,6 +295,7 @@ class WordsTableCompanion extends UpdateCompanion<WordsTableData> {
   final Value<String> id;
   final Value<String> en;
   final Value<String> ar;
+  final Value<bool> isSaved;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
   final Value<int> rowid;
@@ -259,6 +303,7 @@ class WordsTableCompanion extends UpdateCompanion<WordsTableData> {
     this.id = const Value.absent(),
     this.en = const Value.absent(),
     this.ar = const Value.absent(),
+    this.isSaved = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -267,6 +312,7 @@ class WordsTableCompanion extends UpdateCompanion<WordsTableData> {
     required String id,
     required String en,
     required String ar,
+    this.isSaved = const Value.absent(),
     required DateTime createdAt,
     required DateTime updatedAt,
     this.rowid = const Value.absent(),
@@ -279,6 +325,7 @@ class WordsTableCompanion extends UpdateCompanion<WordsTableData> {
     Expression<String>? id,
     Expression<String>? en,
     Expression<String>? ar,
+    Expression<bool>? isSaved,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
     Expression<int>? rowid,
@@ -287,6 +334,7 @@ class WordsTableCompanion extends UpdateCompanion<WordsTableData> {
       if (id != null) 'id': id,
       if (en != null) 'en': en,
       if (ar != null) 'ar': ar,
+      if (isSaved != null) 'is_saved': isSaved,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (rowid != null) 'rowid': rowid,
@@ -297,6 +345,7 @@ class WordsTableCompanion extends UpdateCompanion<WordsTableData> {
     Value<String>? id,
     Value<String>? en,
     Value<String>? ar,
+    Value<bool>? isSaved,
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
     Value<int>? rowid,
@@ -305,6 +354,7 @@ class WordsTableCompanion extends UpdateCompanion<WordsTableData> {
       id: id ?? this.id,
       en: en ?? this.en,
       ar: ar ?? this.ar,
+      isSaved: isSaved ?? this.isSaved,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       rowid: rowid ?? this.rowid,
@@ -322,6 +372,9 @@ class WordsTableCompanion extends UpdateCompanion<WordsTableData> {
     }
     if (ar.present) {
       map['ar'] = Variable<String>(ar.value);
+    }
+    if (isSaved.present) {
+      map['is_saved'] = Variable<bool>(isSaved.value);
     }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
@@ -341,6 +394,7 @@ class WordsTableCompanion extends UpdateCompanion<WordsTableData> {
           ..write('id: $id, ')
           ..write('en: $en, ')
           ..write('ar: $ar, ')
+          ..write('isSaved: $isSaved, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('rowid: $rowid')
@@ -365,6 +419,7 @@ typedef $$WordsTableTableCreateCompanionBuilder =
       required String id,
       required String en,
       required String ar,
+      Value<bool> isSaved,
       required DateTime createdAt,
       required DateTime updatedAt,
       Value<int> rowid,
@@ -374,6 +429,7 @@ typedef $$WordsTableTableUpdateCompanionBuilder =
       Value<String> id,
       Value<String> en,
       Value<String> ar,
+      Value<bool> isSaved,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
       Value<int> rowid,
@@ -400,6 +456,11 @@ class $$WordsTableTableFilterComposer
 
   ColumnFilters<String> get ar => $composableBuilder(
     column: $table.ar,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isSaved => $composableBuilder(
+    column: $table.isSaved,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -438,6 +499,11 @@ class $$WordsTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<bool> get isSaved => $composableBuilder(
+    column: $table.isSaved,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
@@ -466,6 +532,9 @@ class $$WordsTableTableAnnotationComposer
 
   GeneratedColumn<String> get ar =>
       $composableBuilder(column: $table.ar, builder: (column) => column);
+
+  GeneratedColumn<bool> get isSaved =>
+      $composableBuilder(column: $table.isSaved, builder: (column) => column);
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
@@ -508,6 +577,7 @@ class $$WordsTableTableTableManager
                 Value<String> id = const Value.absent(),
                 Value<String> en = const Value.absent(),
                 Value<String> ar = const Value.absent(),
+                Value<bool> isSaved = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -515,6 +585,7 @@ class $$WordsTableTableTableManager
                 id: id,
                 en: en,
                 ar: ar,
+                isSaved: isSaved,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 rowid: rowid,
@@ -524,6 +595,7 @@ class $$WordsTableTableTableManager
                 required String id,
                 required String en,
                 required String ar,
+                Value<bool> isSaved = const Value.absent(),
                 required DateTime createdAt,
                 required DateTime updatedAt,
                 Value<int> rowid = const Value.absent(),
@@ -531,6 +603,7 @@ class $$WordsTableTableTableManager
                 id: id,
                 en: en,
                 ar: ar,
+                isSaved: isSaved,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 rowid: rowid,
