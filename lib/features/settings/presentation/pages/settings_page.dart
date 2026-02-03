@@ -158,7 +158,7 @@ class SettingsPage extends StatelessWidget {
                       onPressed: () async {
                         final service = sl<NotificationsService>();
                         await service.requestPermissions();
-                        await launchWorker(true, service);
+                        await launchWorker(service, true);
                         if (!context.mounted) return;
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(

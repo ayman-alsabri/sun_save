@@ -20,7 +20,7 @@ Future<void> main() async {
   await Workmanager().initialize(callbackDispatcher);
   await sl<NotificationsService>().init();
   await sl<NotificationsService>().requestPermissions();
-  await launchWorker(true, sl<NotificationsService>());
+  await launchWorker(sl<NotificationsService>());
   await dotenv.load(fileName: ".env");
 
   runApp(const SunSaveApp());

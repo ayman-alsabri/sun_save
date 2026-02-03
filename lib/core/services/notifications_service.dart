@@ -13,8 +13,8 @@ import '../db/app_database.dart';
 
 @pragma('vm:entry-point')
 Future<NotificationsService> launchWorker([
-  bool reset = false,
   NotificationsService? service,
+  bool reset = false,
 ]) async {
   final notificationsService = service ?? NotificationsService.background();
   if (reset) {
@@ -32,6 +32,9 @@ Future<NotificationsService> launchWorker([
     NotificationsService.taskName,
     frequency: Duration(minutes: 15),
     initialDelay: Duration.zero,
+    existingWorkPolicy: reset
+        ? ExistingPeriodicWorkPolicy.replace
+        : ExistingPeriodicWorkPolicy.keep,
   );
   return notificationsService;
 }

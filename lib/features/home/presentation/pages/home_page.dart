@@ -72,18 +72,21 @@ class _HomePageState extends State<HomePage> {
         length: 2,
         child: Scaffold(
           appBar: AppBar(
-            title: BlocBuilder<AuthBloc, AuthState>(
-              builder: (context, state) {
-                final username = state.user?.name ?? '';
-                final now = DateTime.now();
-                if (now.weekday == DateTime.friday) {
-                  return Text(l10n.greetingFriday(username));
-                } else if (now.hour < 12) {
-                  return Text(l10n.greetingMorning(username));
-                } else {
-                  return Text(l10n.greetingAfternoon(username));
-                }
-              },
+            title: DefaultTextStyle(
+              style: Theme.of(context).textTheme.titleSmall!,
+              child: BlocBuilder<AuthBloc, AuthState>(
+                builder: (context, state) {
+                  final username = state.user?.name ?? '';
+                  final now = DateTime.now();
+                  if (now.weekday == DateTime.friday) {
+                    return Text(l10n.greetingFriday(username));
+                  } else if (now.hour < 12) {
+                    return Text(l10n.greetingMorning(username));
+                  } else {
+                    return Text(l10n.greetingAfternoon(username));
+                  }
+                },
+              ),
             ),
             bottom: TabBar(
               tabs: [
