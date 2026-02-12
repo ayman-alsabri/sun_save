@@ -329,4 +329,13 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get tipSpeakLists =>
       '• استخدم ميزة النطق للاستماع إلى كلماتك المحفوظة أو غير المحفوظة لمراجعة سريعة.';
+
+  @override
+  String get debugMode => 'وضع التصحيح';
+
+  @override
+  String get enabled => 'مفعل';
+
+  @override
+  String get disabled => 'معطل';
 }

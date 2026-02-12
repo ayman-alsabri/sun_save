@@ -237,6 +237,16 @@ class SettingsPage extends StatelessWidget {
                   onTap: () => Navigator.of(context).pushNamed(AppRoutes.about),
                 ),
                 ListTile(
+                  leading: const Icon(Icons.bug_report_outlined),
+                  title: Text(l10n.debugMode),
+                  subtitle: Text(
+                    state.debugMode ? l10n.enabled : l10n.disabled,
+                  ),
+                  onTap: () => context.read<SettingsCubit>().setDebugMode(
+                    !state.debugMode,
+                  ),
+                ),
+                ListTile(
                   leading: const Icon(Icons.logout),
                   title: Text(l10n.drawerLogout),
                   onTap: () {

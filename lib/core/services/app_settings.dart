@@ -11,6 +11,9 @@ class AppSettings extends Equatable {
   final int ttsIterations;
   final Color seedColor;
 
+  /// Debug mode
+  final bool debugMode;
+
   /// Notification settings
   final int wordsPerDay;
 
@@ -24,6 +27,7 @@ class AppSettings extends Equatable {
     required this.ttsIterations,
     required this.seedColor,
     required this.wordsPerDay,
+    required this.debugMode,
     required this.notifyStartMinutes,
     required this.notifyEndMinutes,
   });
@@ -34,6 +38,7 @@ class AppSettings extends Equatable {
         language: AppLanguage.system,
         ttsIterations: 1,
         seedColor: Colors.yellow,
+        debugMode: false,
         wordsPerDay: 10,
         notifyStartMinutes: 9 * 60,
         notifyEndMinutes: 21 * 60,
@@ -47,6 +52,7 @@ class AppSettings extends Equatable {
     int? wordsPerDay,
     int? notifyStartMinutes,
     int? notifyEndMinutes,
+    bool? debugMode,
   }) {
     return AppSettings(
       themeMode: themeMode ?? this.themeMode,
@@ -54,6 +60,7 @@ class AppSettings extends Equatable {
       ttsIterations: ttsIterations ?? this.ttsIterations,
       seedColor: seedColor ?? this.seedColor,
       wordsPerDay: wordsPerDay ?? this.wordsPerDay,
+      debugMode: debugMode ?? this.debugMode,
       notifyStartMinutes: notifyStartMinutes ?? this.notifyStartMinutes,
       notifyEndMinutes: notifyEndMinutes ?? this.notifyEndMinutes,
     );
@@ -68,5 +75,6 @@ class AppSettings extends Equatable {
     wordsPerDay,
     notifyStartMinutes,
     notifyEndMinutes,
+    debugMode,
   ];
 }

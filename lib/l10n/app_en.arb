@@ -155,5 +155,8 @@
     "tipsTitle": "Helpful tips",
     "tipHideShowGlobal": "• Use the menu to show or hide English or Arabic across the app.",
     "tipHideShowPerWord": "• Use the actions on each word to show/hide it individually.",
-    "tipSpeakLists": "• Use Speak to listen to your saved or unsaved words for quick practice."
+    "tipSpeakLists": "• Use Speak to listen to your saved or unsaved words for quick practice.",
+    "debugMode": "Debug mode",
+    "enabled": "Enabled",
+    "disabled": "Disabled"
 }

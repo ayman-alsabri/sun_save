@@ -329,4 +329,13 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get tipSpeakLists =>
       '• Use Speak to listen to your saved or unsaved words for quick practice.';
+
+  @override
+  String get debugMode => 'Debug mode';
+
+  @override
+  String get enabled => 'Enabled';
+
+  @override
+  String get disabled => 'Disabled';
 }

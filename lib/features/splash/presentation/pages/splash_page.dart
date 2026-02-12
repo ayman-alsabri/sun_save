@@ -24,13 +24,9 @@ class _SplashPageState extends State<SplashPage> {
       listenWhen: (p, c) => p.status != c.status,
       listener: (context, state) {
         if (state.status == AuthStatus.authenticated) {
-          Navigator.of(
-            context,
-          ).pushNamedAndRemoveUntil(AppRoutes.home, (route) => route.isFirst);
+          Navigator.of(context).pushReplacementNamed(AppRoutes.home);
         } else if (state.status == AuthStatus.unauthenticated) {
-          Navigator.of(
-            context,
-          ).pushNamedAndRemoveUntil(AppRoutes.login, (route) => route.isFirst);
+          Navigator.of(context).pushReplacementNamed(AppRoutes.login);
         }
       },
       child: Scaffold(

@@ -30,11 +30,20 @@ Future<NotificationsService> launchWorker([
   await Workmanager().registerPeriodicTask(
     NotificationsService.channelId,
     NotificationsService.taskName,
-    frequency: Duration(minutes: 15),
+    frequency: NotificationsService.taskManagerFrequency,
+    backoffPolicy: BackoffPolicy.linear,
+    constraints: Constraints(
+      networkType: NetworkType.notRequired,
+      requiresBatteryNotLow: false,
+      requiresCharging: false,
+      requiresDeviceIdle: false,
+      requiresStorageNotLow: false,
+    ),
+    flexInterval: Duration(minutes: 1),
     initialDelay: Duration.zero,
     existingWorkPolicy: reset
         ? ExistingPeriodicWorkPolicy.replace
-        : ExistingPeriodicWorkPolicy.keep,
+        : ExistingPeriodicWorkPolicy.update,
   );
   return notificationsService;
 }
@@ -44,6 +53,7 @@ class NotificationsService {
   static const String taskName = 'daily_word_notification_task';
   static const String counterKey = 'notification_word_counter';
   static const String lastNotificationTimeKey = 'last_notification_time';
+  static const Duration taskManagerFrequency = Duration(hours: 2);
 
   final FlutterLocalNotificationsPlugin _plugin;
   FlutterLocalNotificationsPlugin get plugin => _plugin;
@@ -179,6 +189,7 @@ class NotificationsService {
     final wordsPerDay = settings.wordsPerDay;
     final startMinutes = settings.notifyStartMinutes;
     final endMinutes = settings.notifyEndMinutes;
+    final debugMode = settings.debugMode;
 
     if (wordsPerDay <= 0) return true;
 
@@ -194,8 +205,9 @@ class NotificationsService {
     if (totalWindowMinutes <= 0) totalWindowMinutes = 1;
 
     try {
-      // 15 is for the duration of workmanager
-      final wordsLimit = wordsPerDay * 15 ~/ totalWindowMinutes;
+      final wordsLimit =
+          (wordsPerDay * taskManagerFrequency.inMinutes / totalWindowMinutes)
+              .round();
       final db = AppDatabase();
       int counter = prefs.getInt(counterKey) ?? 0;
       final allWordsCount =
@@ -206,13 +218,11 @@ class NotificationsService {
               .getSingle() ??
           0;
       late final List<WordsTableData> unsavedWords;
-      if (counter == allWordsCount) {
-        unsavedWords = await _selectUnsavedWords(
-          db,
-          limit: wordsLimit,
-          offset: 0,
-        );
-      } else if (counter + wordsLimit > allWordsCount) {
+      //guard
+      if (counter >= allWordsCount) {
+        counter = 0;
+      }
+      if ((counter + wordsLimit) > allWordsCount) {
         unsavedWords = [
           ...await _selectUnsavedWords(
             db,
@@ -281,7 +291,15 @@ class NotificationsService {
 
       await db.close();
     } catch (e) {
-      print("Error in background task: $e");
+      if (!debugMode) return true;
+      final body = e.toString();
+      final notificationDetails = _notificationDetails;
+      await _plugin.show(
+        e.hashCode,
+        '❌🚫⚠️💥😵‍💫🛑 an error occurred 🧯🔧📛',
+        body,
+        notificationDetails,
+      );
     }
 
     return true;

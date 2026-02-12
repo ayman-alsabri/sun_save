@@ -54,4 +54,10 @@ class SettingsCubit extends Cubit<AppSettings> {
     emit(next);
     await local.write(next);
   }
+
+  Future<void> setDebugMode(bool debugMode) async {
+    final next = state.copyWith(debugMode: debugMode);
+    emit(next);
+    await local.write(next);
+  }
 }

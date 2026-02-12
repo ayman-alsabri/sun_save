@@ -16,6 +16,7 @@ class SettingsLocalDataSourceImpl implements SettingsLocalDataSource {
   static const _wordsPerDayKey = 'settings_words_per_day';
   static const _notifyStartMinutesKey = 'settings_notify_start_minutes';
   static const _notifyEndMinutesKey = 'settings_notify_end_minutes';
+  static const _debugModeKey = 'settings_debug_mode';
 
   final SharedPreferences prefs;
   const SettingsLocalDataSourceImpl(this.prefs);
@@ -30,6 +31,7 @@ class SettingsLocalDataSourceImpl implements SettingsLocalDataSource {
     final wordsPerDay = prefs.getInt(_wordsPerDayKey);
     final notifyStartMinutes = prefs.getInt(_notifyStartMinutesKey);
     final notifyEndMinutes = prefs.getInt(_notifyEndMinutesKey);
+    final debugMode = prefs.getBool(_debugModeKey) ?? false;
 
     final themeMode = (themeIndex == null)
         ? AppThemeMode.system
@@ -46,6 +48,7 @@ class SettingsLocalDataSourceImpl implements SettingsLocalDataSource {
     return AppSettings(
       themeMode: themeMode,
       language: language,
+      debugMode: debugMode,
       ttsIterations: iterations.clamp(1, 10),
       seedColor: seedColorValue == null
           ? defaults.seedColor
@@ -66,6 +69,7 @@ class SettingsLocalDataSourceImpl implements SettingsLocalDataSource {
     await prefs.setInt(_languageKey, settings.language.index);
     await prefs.setInt(_ttsIterationsKey, settings.ttsIterations);
     await prefs.setInt(_seedColorKey, settings.seedColor.toARGB32());
+    await prefs.setBool(_debugModeKey, settings.debugMode);
 
     await prefs.setInt(_wordsPerDayKey, settings.wordsPerDay);
     await prefs.setInt(_notifyStartMinutesKey, settings.notifyStartMinutes);

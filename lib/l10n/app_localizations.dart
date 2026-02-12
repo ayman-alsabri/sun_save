@@ -697,6 +697,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'• Use Speak to listen to your saved or unsaved words for quick practice.'**
   String get tipSpeakLists;
+
+  /// No description provided for @debugMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Debug mode'**
+  String get debugMode;
+
+  /// No description provided for @enabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Enabled'**
+  String get enabled;
+
+  /// No description provided for @disabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Disabled'**
+  String get disabled;
 }
 
 class _AppLocalizationsDelegate

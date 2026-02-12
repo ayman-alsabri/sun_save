@@ -116,8 +116,8 @@ class _WordsListItemState extends State<WordsListItem> {
                           isSaved: widget.isSaved,
                           tooltip: showEn ? l10n.hideEnglish : l10n.showEnglish,
                           icon: showEn
-                              ? Icons.visibility_off_outlined
-                              : Icons.visibility_outlined,
+                              ? Icons.visibility_outlined
+                              : Icons.visibility_off_outlined,
                           onPressed: () => context.read<WordsBloc>().add(
                             WordShowEnToggled(
                               wordId: widget.word.id,
@@ -129,8 +129,8 @@ class _WordsListItemState extends State<WordsListItem> {
                           isSaved: widget.isSaved,
                           tooltip: showAr ? l10n.hideArabic : l10n.showArabic,
                           icon: showAr
-                              ? Icons.visibility_off_outlined
-                              : Icons.visibility_outlined,
+                              ? Icons.visibility_outlined
+                              : Icons.visibility_off_outlined,
                           onPressed: () => context.read<WordsBloc>().add(
                             WordShowArToggled(
                               wordId: widget.word.id,
