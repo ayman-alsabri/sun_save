@@ -207,7 +207,7 @@ class NotificationsService {
     try {
       final wordsLimit =
           (wordsPerDay * taskManagerFrequency.inMinutes / totalWindowMinutes)
-              .round();
+              .ceil();
       final db = AppDatabase();
       int counter = prefs.getInt(counterKey) ?? 0;
       final allWordsCount =
