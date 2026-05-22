@@ -59,14 +59,18 @@ class WordsBloc extends Bloc<WordsEvent, WordsState> {
     on<SpeakStopRequested>(_onSpeakStopRequested);
   }
 
+  final limit = 50;
+
   Future<void> _onWordsRequested(
     WordsRequested event,
     Emitter<WordsState> emit,
   ) async {
     emit(state.copyWith(status: WordsStatus.loading));
     try {
-      final words = await getWords();
-      _originalWords = words;
+      final words = await getWords(
+        GetWordsParams(limit: limit, offset: state.words.length),
+      );
+      _originalWords = [..._originalWords, ...words];
       emit(
         state.copyWith(
           status: WordsStatus.loaded,
