@@ -74,8 +74,8 @@ class WordsBloc extends Bloc<WordsEvent, WordsState> {
       emit(
         state.copyWith(
           status: WordsStatus.loaded,
-          words: words,
-          isShuffled: false,
+          words: _originalWords,
+          isShuffled: state.isShuffled,
           message: null,
         ),
       );

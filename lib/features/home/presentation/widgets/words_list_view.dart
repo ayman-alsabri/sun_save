@@ -25,24 +25,35 @@ class WordsListView extends StatelessWidget {
       );
     }
 
-    return NotificationListener<ScrollEndNotification>(
-      onNotification: (notification) {
-        // fucking add more items when we reach the end of the list
-        if (notification.metrics.pixels >=
-            notification.metrics.maxScrollExtent - 200) {
-          context.read<WordsBloc>().add(const WordsRequested());
-        }
-        return false;
+    return BlocBuilder<WordsBloc, WordsState>(
+      buildWhen: (previous, current) =>
+          current.status == WordsStatus.loading ||
+          previous.status == WordsStatus.loading,
+      builder: (context, state) {
+        final isLoading = state.status == WordsStatus.loading;
+        return NotificationListener<ScrollEndNotification>(
+          onNotification: (notification) {
+            // fucking add more items when we reach the end of the list
+            if (notification.metrics.pixels >=
+                notification.metrics.maxScrollExtent - 200) {
+              context.read<WordsBloc>().add(const WordsRequested());
+            }
+            return false;
+          },
+          child: ListView.separated(
+            padding: const EdgeInsets.all(16),
+            itemCount: words.length + (isLoading ? 1 : 0),
+            separatorBuilder: (_, __) => const SizedBox(height: 8),
+            itemBuilder: (context, index) {
+              if (index >= words.length) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              final word = words[index];
+              return WordsListItem(word: word, isSaved: word.isSaved);
+            },
+          ),
+        );
       },
-      child: ListView.separated(
-        padding: const EdgeInsets.all(16),
-        itemCount: words.length,
-        separatorBuilder: (_, __) => const SizedBox(height: 8),
-        itemBuilder: (context, index) {
-          final word = words[index];
-          return WordsListItem(word: word, isSaved: word.isSaved);
-        },
-      ),
     );
   }
 }

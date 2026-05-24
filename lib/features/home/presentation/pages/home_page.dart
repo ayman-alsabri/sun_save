@@ -110,7 +110,8 @@ class _HomePageState extends State<HomePage> {
               Expanded(
                 child: BlocBuilder<WordsBloc, WordsState>(
                   builder: (context, state) {
-                    if (state.status == WordsStatus.loading) {
+                    if (state.status == WordsStatus.loading &&
+                        state.words.isEmpty) {
                       return const Center(child: CircularProgressIndicator());
                     }
                     if (state.status == WordsStatus.failure) {
